@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BINGO - Centro Ancianos Hatillo (v26 - Tamaño Compacto)</title>
+    <title>BINGO - Centro Ancianos Hatillo (v26 - Sonido)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
     <style>
         /* Estilos Generales (sin cambios) */
         body { font-family: 'Inter', sans-serif; }
@@ -53,125 +54,21 @@
         #lastCalledNumberContainer { background-color: #1f2937; border: 2px solid #4b5563; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; margin-bottom: 1rem; text-align: center; }
         #lastCalledNumberDisplay { font-size: 4rem; font-weight: 700; color: #facc15; line-height: 1; min-height: 5rem; display: flex; align-items: center; justify-content: center; }
 
-        /* --- ESTILOS DE IMPRESIÓN v5 (Tamaño Compacto 14cm) --- */
+        /* Estilos de Impresión (sin cambios respecto a v5) */
         @media print {
-            /* Estilos básicos para impresión */
-            body, html {
-                background-color: white !important;
-                color: black !important;
-                margin: 0;
-                padding: 0;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            /* Ocultar elementos no deseados */
-            body > .bg-gray-800 > *:not(.flex.lg\:flex-row),
-            #left-controls,
-            #print-area-container > h2,
-            #print-area-container > .mt-4,
-            .modal { display: none !important; }
-
-            /* Área de impresión */
-            #print-area-container {
-                display: block !important;
-                visibility: visible !important;
-                width: 100% !important;
-                margin: 0 auto;
-                padding: 10mm; /* Margen general de la página */
-                box-sizing: border-box;
-            }
-            #cardsDisplayAreaContainer {
-                margin: 0 !important;
-                padding: 0 !important;
-                display: block !important;
-                 visibility: visible !important;
-            }
-
-            /* Contenedor de los cartones */
-            #cardsDisplayArea {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                justify-content: center; /* Centrar horizontalmente (1 por fila) */
-                gap: 10px; /* Espacio vertical entre filas de cartones */
-                max-height: none !important;
-                height: auto !important;
-                overflow: visible !important;
-                background-color: white !important;
-                border: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                visibility: visible !important;
-            }
-
-            /* --- AJUSTES PARA TAMAÑO "COMPACTO" (14cm) --- */
-            /* Estilos para cada cartón individual */
-            .bingo-card {
-                width: 140mm !important; /* ANCHO COMPACTO (14cm) */
-                height: auto; /* Altura automática */
-                border: 1px solid #999 !important;
-                box-shadow: none !important;
-                margin: 5mm auto !important; /* Margen vertical entre cartones */
-                padding: 5px !important; /* Padding interno */
-                page-break-inside: avoid !important; /* Evitar cortes */
-                display: block !important;
-                opacity: 1 !important;
-                color: black !important;
-                background-color: white !important;
-                visibility: visible !important;
-            }
+            body, html { background-color: white !important; color: black !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body > .bg-gray-800 > *:not(.flex.lg\:flex-row), #left-controls, #print-area-container > h2, #print-area-container > .mt-4, .modal { display: none !important; }
+            #print-area-container { display: block !important; visibility: visible !important; width: 100% !important; margin: 0 auto; padding: 10mm; box-sizing: border-box; }
+            #cardsDisplayAreaContainer { margin: 0 !important; padding: 0 !important; display: block !important; visibility: visible !important; }
+            #cardsDisplayArea { display: flex !important; flex-wrap: wrap !important; justify-content: center; gap: 10px; max-height: none !important; height: auto !important; overflow: visible !important; background-color: white !important; border: none !important; margin: 0 !important; padding: 0 !important; visibility: visible !important; }
+            .bingo-card { width: 140mm !important; height: auto; border: 1px solid #999 !important; box-shadow: none !important; margin: 5mm auto !important; padding: 5px !important; page-break-inside: avoid !important; display: block !important; opacity: 1 !important; color: black !important; background-color: white !important; visibility: visible !important; }
             .sold-card h3::before, .marked-number::after { display: none !important; }
-            .bingo-card h3 { /* Título del cartón */
-                color: black !important;
-                font-size: 12pt !important; /* FUENTE TÍTULO MÁS GRANDE */
-                margin-bottom: 5px !important;
-                text-align: center !important;
-                font-weight: bold;
-                display: block !important;
-                visibility: visible !important;
-            }
-
-            /* Cuadrícula interna del cartón */
-            .bingo-grid {
-                display: grid !important;
-                grid-template-columns: repeat(5, 1fr) !important; /* 5 columnas */
-                gap: 1px !important;
-                text-align: center;
-                border: 1px solid #ccc !important;
-                margin-top: 5px;
-                visibility: visible !important;
-            }
-            /* Celdas (header O número) */
-            .bingo-grid > div {
-                background-color: white !important;
-                color: black !important;
-                border: 1px solid #ccc !important;
-                font-size: 10pt !important; /* FUENTE NÚMEROS MÁS GRANDE */
-                min-height: 20mm !important; /* ALTURA CELDAS MÁS GRANDE */
-                padding: 1px 0 !important;
-                display: flex !important; /* Centrar contenido */
-                align-items: center !important;
-                justify-content: center !important;
-                font-weight: bold;
-                box-sizing: border-box;
-                visibility: visible !important;
-            }
-            .bingo-grid .header { /* Celdas de encabezado (B,I,N,G,O) */
-                background-color: #eee !important;
-                font-weight: bold !important;
-                font-size: 11pt !important; /* FUENTE HEADER MÁS GRANDE */
-                min-height: 10mm !important; /* ALTURA HEADER MÁS GRANDE */
-            }
-            .bingo-grid .free-space { /* Celda "LIBRE" */
-                background-color: #f0f0f0 !important;
-                font-style: normal !important;
-                font-size: 9pt !important; /* FUENTE LIBRE */
-                font-weight: bold;
-            }
-            /* --- FIN AJUSTES --- */
+            .bingo-card h3 { color: black !important; font-size: 12pt !important; margin-bottom: 5px !important; text-align: center !important; font-weight: bold; display: block !important; visibility: visible !important; }
+            .bingo-grid { display: grid !important; grid-template-columns: repeat(5, 1fr) !important; gap: 1px !important; text-align: center; border: 1px solid #ccc !important; margin-top: 5px; visibility: visible !important; }
+            .bingo-grid > div { background-color: white !important; color: black !important; border: 1px solid #ccc !important; font-size: 10pt !important; min-height: 20mm !important; padding: 1px 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold; box-sizing: border-box; visibility: visible !important; }
+            .bingo-grid .header { background-color: #eee !important; font-weight: bold !important; font-size: 11pt !important; min-height: 10mm !important; }
+            .bingo-grid .free-space { background-color: #f0f0f0 !important; font-style: normal !important; font-size: 9pt !important; font-weight: bold; }
         }
-        /* --- FIN ESTILOS DE IMPRESIÓN --- */
-
     </style>
 </head>
 <body class="dark bg-gray-900 text-gray-300 p-4">
@@ -243,7 +140,7 @@
     <div id="shareModal" class="modal hidden"> <div class="modal-content"> <h2>Compartir Cartón Vendido</h2> <p class="text-sm text-gray-400 mb-4">Se ha generado una imagen del cartón. Descárgala y luego compártela por WhatsApp.</p> <div id="shareImagePreviewContainer"> <span id="shareLoading" class="hidden">Generando imagen...</span> <img id="shareImagePreview" src="" alt="Vista previa del cartón" class="hidden"/> </div> <div class="modal-buttons"> <button id="downloadImageButton" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out" disabled>Descargar Imagen</button> <button id="shareWhatsAppButton" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out" disabled>Compartir por WhatsApp</button> <button id="closeShareModalButton" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out">Cerrar</button> </div> <p class="text-xs text-gray-500 mt-3 text-center">Nota: Para WhatsApp, asegúrate que el número de teléfono incluya el código de país (ej: 506 para Costa Rica).</p> </div> </div>
 
     <script>
-        // --- Código JavaScript (v26 - sin cambios) ---
+        // --- Código JavaScript (v26 - con Sonido) ---
         const NUM_CARDS = 100; const MIN_NUMBER = 1; const MAX_NUMBER = 75;
         const BINGO_RANGES = { B: { min: 1, max: 15, count: 5 }, I: { min: 16, max: 30, count: 5 }, N: { min: 31, max: 45, count: 4 }, G: { min: 46, max: 60, count: 5 }, O: { min: 61, max: 75, count: 5 } };
         const BINGO_COLUMNS = ['B', 'I', 'N', 'G', 'O'];
@@ -268,14 +165,18 @@
             shareLoading, shareImagePreview, downloadImageButton, shareWhatsAppButton, closeShareModalButton,
             gamePatternSelect, lastCalledNumberDisplay, printCardsButton;
 
-        // ... (El resto del código JavaScript permanece igual) ...
+        // --- Funciones de Persistencia (LocalStorage) ---
         function saveStateToLocalStorage() { try { if (cardsAreGenerated) { localStorage.setItem(STORAGE_KEYS.cards, JSON.stringify(allCardsData)); localStorage.setItem(STORAGE_KEYS.called, JSON.stringify(Array.from(calledNumbers))); localStorage.setItem(STORAGE_KEYS.active, JSON.stringify(gameActive)); localStorage.setItem(STORAGE_KEYS.generated, JSON.stringify(cardsAreGenerated)); localStorage.setItem(STORAGE_KEYS.winners, JSON.stringify(winners)); } } catch (error) { console.error("Error al guardar estado en localStorage:", error); } }
         function loadStateFromLocalStorage() { console.log("--- Intentando cargar estado v26 desde localStorage ---"); try { const savedGenerated = localStorage.getItem(STORAGE_KEYS.generated); if (savedGenerated && JSON.parse(savedGenerated)) { cardsAreGenerated = true; const savedCards = localStorage.getItem(STORAGE_KEYS.cards); allCardsData = savedCards ? JSON.parse(savedCards) : []; const savedCalled = localStorage.getItem(STORAGE_KEYS.called); calledNumbers = savedCalled ? new Set(JSON.parse(savedCalled)) : new Set(); const savedActive = localStorage.getItem(STORAGE_KEYS.active); const savedWinners = localStorage.getItem(STORAGE_KEYS.winners); winners = savedWinners ? JSON.parse(savedWinners) : []; let loadedGameActive = savedActive ? JSON.parse(savedActive) : false; if (loadedGameActive && calledNumbers.size === 0 && winners.length === 0) { gameActive = false; console.warn("Estado activo inválido detectado al cargar (sin números ni ganadores). Corregido a inactivo."); } else { gameActive = loadedGameActive; } console.log("Estado v26 cargado desde localStorage.", { cardsAreGenerated, gameActive, calledNumbersCount: calledNumbers.size, winnersCount: winners.length, totalCards: allCardsData.length }); return true; } else { console.log("No se encontró estado generado (v26) válido en localStorage. Iniciando estado limpio."); clearLocalStorageVars(); } } catch (error) { console.error("Error crítico al cargar estado v26 desde localStorage:", error); clearLocalStorage(); clearLocalStorageVars(); } console.log("--- Carga de estado v26 finalizada (sin datos cargados o con error) ---"); return false; }
         function clearLocalStorageVars() { cardsAreGenerated = false; allCardsData = []; calledNumbers = new Set(); gameActive = false; winners = []; cardsForGame = {}; currentGamePattern = 'full_card'; if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = '-'; if(printCardsButton) printCardsButton.disabled = true; console.log("Variables globales de estado reseteadas en memoria."); }
         function clearLocalStorage() { console.log("--- Limpiando claves de Bingo v26 en localStorage ---"); for (const key in STORAGE_KEYS) { localStorage.removeItem(STORAGE_KEYS[key]); console.log(`Clave eliminada: ${STORAGE_KEYS[key]}`); } clearLocalStorageVars(); console.log("--- Limpieza de localStorage v26 completada ---"); }
+
+        // --- Funciones de Generación de Cartones ---
         function getRandomNumbersInRange(min, max, count) { const numbers = new Set(); const possibleNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i); while (numbers.size < count && possibleNumbers.length > 0) { const randomIndex = Math.floor(Math.random() * possibleNumbers.length); numbers.add(possibleNumbers.splice(randomIndex, 1)[0]); } return Array.from(numbers).sort((a, b) => a - b); }
         function generateBingoCardData(cardId) { const cardNumbers = {}; BINGO_COLUMNS.forEach(col => { const range = BINGO_RANGES[col]; cardNumbers[col] = getRandomNumbersInRange(range.min, range.max, range.count); }); return { id: cardId, numbers: cardNumbers, isSold: false, buyerName: '', buyerPhone: '' }; }
         function generateAllCardsData() { allCardsData = []; for (let i = 1; i <= NUM_CARDS; i++) { allCardsData.push(generateBingoCardData(i)); } cardsAreGenerated = true; console.log(`${NUM_CARDS} cartones generados en memoria.`); }
+
+        // --- Funciones de Visualización y UI ---
         function displayCardsForSale(cardsData) { if (!cardsDisplayArea) { console.error("Error: cardsDisplayArea no encontrado en el DOM."); return; } cardsDisplayArea.innerHTML = ''; if (!cardsData || cardsData.length === 0) { cardsDisplayArea.innerHTML = '<p class="text-gray-500">No hay cartones generados.</p>'; return; } cardsData.forEach(card => { const cardElement = document.createElement('div'); cardElement.className = `bingo-card ${card.isSold ? 'sold-card' : ''}`; cardElement.dataset.cardId = card.id; let gridHTML = `<h3>Cartón ID: ${card.id}</h3><div class="bingo-grid">`; BINGO_COLUMNS.forEach(col => gridHTML += `<div class="header">${col}</div>`); for (let i = 0; i < 5; i++) { BINGO_COLUMNS.forEach((col, j) => { if (i === 2 && j === 2) { gridHTML += `<div class="free-space">LIBRE</div>`; } else { const index = (col === 'N' && i >= 2) ? i - 1 : i; const number = card.numbers[col][index] || ''; const isMarked = card.isSold && calledNumbers.has(number); gridHTML += `<div class="${isMarked ? 'marked-number' : ''}">${number}</div>`; } }); } gridHTML += `</div>`; cardElement.innerHTML = gridHTML; cardsDisplayArea.appendChild(cardElement); }); updateSoldCountDisplay(); }
         function handleCardClick(event) { const cardElement = event.currentTarget; const cardId = parseInt(cardElement.dataset.cardId); const cardData = allCardsData.find(card => card.id === cardId); if (!cardData || gameActive) return; if (cardData.isSold) { openInfoModal(cardData); } else { openSaleModal(cardId); } }
         function openSaleModal(cardId) { currentEditingCardId = cardId; modalTitle.textContent = `Vender Cartón ID: ${cardId}`; modalCardIdInput.value = cardId; modalSaleFields.classList.remove('hidden'); modalInfoFields.classList.add('hidden'); saveSaleButton.classList.remove('hidden'); buyerNameInput.value = ''; buyerPhoneInput.value = ''; saleInfoModal.classList.remove('hidden'); buyerNameInput.focus(); }
@@ -285,27 +186,103 @@
         function closeWinnerModal() { winnerModal.classList.add('hidden'); }
         function markNumberOnCards(number) { if (!cardsDisplayArea) return; const targetNumberStr = String(number); const soldCards = cardsDisplayArea.querySelectorAll('.bingo-card.sold-card'); soldCards.forEach(cardElement => { const numberDivs = cardElement.querySelectorAll('.bingo-grid div:not(.header):not(.free-space)'); numberDivs.forEach(div => { if (div.textContent === targetNumberStr) { div.classList.add('marked-number'); } }); }); }
         function clearAllCardMarkings() { if (!cardsDisplayArea) return; const markedDivs = cardsDisplayArea.querySelectorAll('.marked-number'); markedDivs.forEach(div => { div.classList.remove('marked-number'); }); console.log("Marcas de números limpiadas de los cartones."); }
+
+        // --- Funciones de Lógica del Juego ---
         function isNumberMarked(number, calledNumbersSet) { return calledNumbersSet.has(number); }
         function checkFullCardWin(cardData, calledNumbersSet) { for (const col of BINGO_COLUMNS) { for (const number of cardData.numbers[col]) { if (!isNumberMarked(number, calledNumbersSet)) { return false; } } } return true; }
         function checkCornersWin(cardData, calledNumbersSet) { const bNums = cardData.numbers.B; const oNums = cardData.numbers.O; return isNumberMarked(bNums[0], calledNumbersSet) && isNumberMarked(oNums[0], calledNumbersSet) && isNumberMarked(bNums[bNums.length - 1], calledNumbersSet) && isNumberMarked(oNums[oNums.length - 1], calledNumbersSet); }
         function checkLineWin(cardData, calledNumbersSet) { const nums = cardData.numbers; for (let i = 0; i < 5; i++) { let rowComplete = true; for (let j = 0; j < 5; j++) { const colLetter = BINGO_COLUMNS[j]; if (j === 2 && i === 2) continue; let numIndex = i; if (colLetter === 'N') { if (i < 2) numIndex = i; else if (i > 2) numIndex = i - 1; } if (!isNumberMarked(nums[colLetter][numIndex], calledNumbersSet)) { rowComplete = false; break; } } if (rowComplete) return true; } for (let j = 0; j < 5; j++) { let colComplete = true; const colLetter = BINGO_COLUMNS[j]; const colNums = nums[colLetter]; for (let i = 0; i < 5; i++) { if (j === 2 && i === 2) continue; let numIndex = i; if (colLetter === 'N') { if (i < 2) numIndex = i; else if (i > 2) numIndex = i - 1; } if (!isNumberMarked(colNums[numIndex], calledNumbersSet)) { colComplete = false; break; } } if (colComplete) return true; } let diag1Complete = isNumberMarked(nums.B[0], calledNumbersSet) && isNumberMarked(nums.I[1], calledNumbersSet) && isNumberMarked(nums.G[3], calledNumbersSet) && isNumberMarked(nums.O[4], calledNumbersSet); if (diag1Complete) return true; let diag2Complete = isNumberMarked(nums.O[0], calledNumbersSet) && isNumberMarked(nums.G[1], calledNumbersSet) && isNumberMarked(nums.I[3], calledNumbersSet) && isNumberMarked(nums.B[4], calledNumbersSet); if (diag2Complete) return true; return false; }
         function prepareCardsForGame() { cardsForGame = {}; if (!allCardsData) return 0; const soldCards = allCardsData.filter(card => card.isSold); soldCards.forEach(cardData => { cardsForGame[cardData.id] = cardData; }); const count = Object.keys(cardsForGame).length; console.log(`Preparados ${count} cartones vendidos para la verificación de ganadores.`); return count; }
+
+        // --- Funciones de Control del Flujo del Juego ---
         function handleGenerateForSale() { console.log("--- Botón 'Generar Cartones' presionado ---"); const enteredPassword = prompt("Por seguridad, ingresa la clave para generar cartones:"); if (enteredPassword === null) { displayMessage("Generación cancelada."); console.log("Generación cancelada por el usuario en prompt de clave."); return; } if (enteredPassword !== RESET_PASSWORD) { console.warn("Intento de generar cartones con clave incorrecta."); displayMessage("Clave incorrecta. Generación cancelada."); return; } console.log("Clave correcta para generar cartones."); if (cardsAreGenerated && !confirm("¿Estás seguro de generar un NUEVO set de cartones? ¡Se PERDERÁN todas las ventas y sorteos anteriores! Esta acción NO se puede deshacer.")) { console.log("Generación cancelada por el usuario en confirmación."); return; } try { displayMessage("Generando cartones, por favor espera..."); console.log("Limpiando estado anterior (localStorage y variables)..."); clearLocalStorage(); console.log("Generando nuevos datos de cartones..."); generateAllCardsData(); console.log(`${allCardsData.length} cartones generados en memoria.`); console.log("Mostrando los nuevos cartones en la interfaz..."); displayCardsForSale(allCardsData); console.log("Actualizando contadores y UI..."); updateCalledNumbersDisplay(); updateSoldCountDisplay(); if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = '-'; updateUI(); displayMessage(`¡${NUM_CARDS} cartones generados! Haz clic en un cartón para venderlo.`); console.log("Guardando nuevo estado inicial en localStorage..."); saveStateToLocalStorage(); console.log("--- Proceso 'Generar Cartones' completado ---"); } catch(error) { console.error("!!! ERROR GRAVE durante la generación de cartones:", error); displayMessage("Error al generar los cartones. Revisa la consola (F12) para detalles."); clearLocalStorage(); updateUI(); } }
-        function startNewRound() { console.log("--- Botón 'Iniciar Sorteo' / 'Siguiente Sorteo' presionado ---"); if (!cardsAreGenerated) { displayMessage("Error: Debes generar los cartones primero."); console.log("Inicio de sorteo abortado: no hay cartones generados."); return; } if (gameActive) { displayMessage("El sorteo ya está en curso."); console.log("Inicio de sorteo abortado: juego ya activo."); return; } currentGamePattern = gamePatternSelect.value; console.log(`Iniciando sorteo con patrón: ${currentGamePattern} (${getPatternFriendlyName(currentGamePattern)})`); clearAllCardMarkings(); if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = '-'; displayMessage(`Iniciando nuevo sorteo (${getPatternFriendlyName(currentGamePattern)})...`); const soldCardsCount = prepareCardsForGame(); if (soldCardsCount === 0) { displayMessage("No se puede iniciar el sorteo: no hay cartones vendidos."); console.log("Inicio de sorteo abortado: no hay cartones vendidos."); return; } calledNumbers = new Set(); winners = []; console.log("Estado de la ronda reseteado (números cantados, ganadores)."); console.log("Estableciendo gameActive = true..."); gameActive = true; updateCalledNumbersDisplay(); console.log("Llamando a updateUI para actualizar controles..."); updateUI(); displayMessage(`Nuevo sorteo (${getPatternFriendlyName(currentGamePattern)}) iniciado con ${soldCardsCount} cartones. Ingrese el primer número.`); try { numberInput.focus(); } catch(e) { console.warn("No se pudo poner foco en el input de número:", e); } saveStateToLocalStorage(); console.log("--- Inicio de nueva ronda completado ---"); }
+        function startNewRound() {
+            console.log("--- Botón 'Iniciar Sorteo' / 'Siguiente Sorteo' presionado ---");
+            if (!cardsAreGenerated) { displayMessage("Error: Debes generar los cartones primero."); console.log("Inicio de sorteo abortado: no hay cartones generados."); return; }
+            if (gameActive) { displayMessage("El sorteo ya está en curso."); console.log("Inicio de sorteo abortado: juego ya activo."); return; }
+
+            // *** NUEVO: Iniciar contexto de audio de Tone.js ***
+            if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
+                Tone.start().then(() => {
+                    console.log("Contexto de audio iniciado.");
+                }).catch(e => {
+                    console.error("Error al iniciar contexto de audio:", e);
+                });
+            }
+
+            currentGamePattern = gamePatternSelect.value;
+            console.log(`Iniciando sorteo con patrón: ${currentGamePattern} (${getPatternFriendlyName(currentGamePattern)})`);
+            clearAllCardMarkings();
+            if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = '-';
+            displayMessage(`Iniciando nuevo sorteo (${getPatternFriendlyName(currentGamePattern)})...`);
+            const soldCardsCount = prepareCardsForGame();
+            if (soldCardsCount === 0) { displayMessage("No se puede iniciar el sorteo: no hay cartones vendidos."); console.log("Inicio de sorteo abortado: no hay cartones vendidos."); return; }
+            calledNumbers = new Set();
+            winners = [];
+            console.log("Estado de la ronda reseteado (números cantados, ganadores).");
+            console.log("Estableciendo gameActive = true...");
+            gameActive = true;
+            updateCalledNumbersDisplay();
+            console.log("Llamando a updateUI para actualizar controles...");
+            updateUI();
+            displayMessage(`Nuevo sorteo (${getPatternFriendlyName(currentGamePattern)}) iniciado con ${soldCardsCount} cartones. Ingrese el primer número.`);
+            try { numberInput.focus(); } catch(e) { console.warn("No se pudo poner foco en el input de número:", e); }
+            saveStateToLocalStorage();
+            console.log("--- Inicio de nueva ronda completado ---");
+        }
         function callNumber() { if (!gameActive) { displayMessage("El sorteo no está activo. Presiona 'Iniciar Sorteo'."); return; } const numStr = numberInput.value.trim(); if (!numStr) { displayMessage("Por favor, ingrese un número."); numberInput.focus(); return; } const num = parseInt(numStr, 10); if (isNaN(num) || num < MIN_NUMBER || num > MAX_NUMBER) { displayMessage(`Número inválido. Debe ser entre ${MIN_NUMBER} y ${MAX_NUMBER}.`); numberInput.value = ''; numberInput.focus(); return; } if (calledNumbers.has(num)) { displayMessage(`El número ${num} ya fue cantado.`); numberInput.value = ''; numberInput.focus(); return; } calledNumbers.add(num); updateCalledNumbersDisplay(); markNumberOnCards(num); if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = num; displayMessage(`Número ${num} cantado. Verificando ganadores (${getPatternFriendlyName(currentGamePattern)})...`); numberInput.value = ''; numberInput.focus(); saveStateToLocalStorage(); setTimeout(() => { checkForWinner(num); if(gameActive) { displayMessage(`Esperando siguiente número. ${calledNumbers.size} cantados.`); } }, 50); }
         function checkForWinner(lastNumberCalled) { let newlyWon = false; console.log(`Verificando ganadores para patrón: ${currentGamePattern} con número ${lastNumberCalled}`); for (const cardIdStr in cardsForGame) { const cardId = parseInt(cardIdStr); if (winners.includes(cardId)) continue; const cardData = cardsForGame[cardId]; let isWinner = false; switch (currentGamePattern) { case 'full_card': isWinner = checkFullCardWin(cardData, calledNumbers); break; case 'line': isWinner = checkLineWin(cardData, calledNumbers); break; case 'corners': isWinner = checkCornersWin(cardData, calledNumbers); break; default: console.error(`Patrón de juego desconocido encontrado: ${currentGamePattern}`); return; } if (isWinner) { if (!winners.includes(cardId)) { winners.push(cardId); newlyWon = true; console.log(`¡BINGO! (${getPatternFriendlyName(currentGamePattern)}) detectado para Cartón ${cardId}`); const winnerCardElement = cardsDisplayArea.querySelector(`.bingo-card[data-card-id="${cardId}"]`); if (winnerCardElement) { winnerCardElement.style.borderColor = 'gold'; winnerCardElement.style.borderWidth = '4px'; } } } } if (newlyWon) { announceWinner(lastNumberCalled); } else { console.log(`No se encontraron nuevos ganadores con el número ${lastNumberCalled}.`); } }
-        function announceWinner(winningNumber) { gameActive = false; const patternName = getPatternFriendlyName(currentGamePattern); console.log(`¡Bingo anunciado! Patrón: ${patternName}. Número ganador: ${winningNumber}. Ganadores: ${winners.join(', ')}`); const winnerDetails = winners.map(id => { const cardData = allCardsData.find(c => c.id === id); let detail = `<strong>Cartón ${id}`; if (cardData) { detail += ` (Vendido a: ${cardData.buyerName || 'Comprador Anónimo'})`; } else { detail += ` (Error al obtener datos)`; } detail += `</strong>`; return detail; }).join('<br>'); let winnerPopupText = `¡BINGO por ${patternName} con el número <strong>${winningNumber}</strong>!<br><br>Ganador(es):<br>${winnerDetails}`; winnerModalText.innerHTML = winnerPopupText; winnerModal.classList.remove('hidden'); updateUI(); displayMessage(`¡Sorteo (${patternName}) terminado! Presiona 'Siguiente Sorteo' para continuar o 'Nuevo Evento' para reiniciar.`); saveStateToLocalStorage(); }
+        function announceWinner(winningNumber) {
+            gameActive = false;
+            const patternName = getPatternFriendlyName(currentGamePattern);
+            console.log(`¡Bingo anunciado! Patrón: ${patternName}. Número ganador: ${winningNumber}. Ganadores: ${winners.join(', ')}`);
+
+            // *** NUEVO: Tocar sonido de BINGO ***
+            try {
+                if (typeof Tone !== 'undefined') {
+                    const synth = new Tone.Synth().toDestination();
+                    const now = Tone.now();
+                    // Tocar una secuencia simple de notas ascendentes
+                    synth.triggerAttackRelease("C4", "8n", now);
+                    synth.triggerAttackRelease("E4", "8n", now + 0.15); // Más rápido
+                    synth.triggerAttackRelease("G4", "8n", now + 0.3);
+                    synth.triggerAttackRelease("C5", "4n", now + 0.45); // Nota final más larga
+                    console.log("Sonido de bingo reproducido.");
+                } else {
+                    console.warn("Tone.js no está definido, no se puede reproducir sonido.");
+                }
+            } catch(e) {
+                console.error("Error al reproducir sonido de bingo:", e);
+            }
+            // *** FIN SONIDO ***
+
+            const winnerDetails = winners.map(id => { const cardData = allCardsData.find(c => c.id === id); let detail = `<strong>Cartón ${id}`; if (cardData) { detail += ` (Vendido a: ${cardData.buyerName || 'Comprador Anónimo'})`; } else { detail += ` (Error al obtener datos)`; } detail += `</strong>`; return detail; }).join('<br>');
+            let winnerPopupText = `¡BINGO por ${patternName} con el número <strong>${winningNumber}</strong>!<br><br>Ganador(es):<br>${winnerDetails}`;
+            winnerModalText.innerHTML = winnerPopupText;
+            winnerModal.classList.remove('hidden'); // Mostrar modal DESPUÉS de intentar tocar sonido
+            updateUI();
+            displayMessage(`¡Sorteo (${patternName}) terminado! Presiona 'Siguiente Sorteo' para continuar o 'Nuevo Evento' para reiniciar.`);
+            saveStateToLocalStorage();
+        }
+
+        // --- Funciones Auxiliares de UI ---
         function updateCalledNumbersDisplay() { if (!calledNumbersDisplay || !calledCount) return; const sortedNumbers = Array.from(calledNumbers).sort((a, b) => a - b); calledCount.textContent = sortedNumbers.length; if (sortedNumbers.length === 0) { calledNumbersDisplay.innerHTML = '<span class="text-gray-500">- Esperando números -</span>'; } else { calledNumbersDisplay.innerHTML = sortedNumbers.map(num => `<span class="called-number">${num}</span>`).join(' '); } }
         function updateSoldCountDisplay() { if (!soldCount || !allCardsData) return; const count = allCardsData.filter(card => card.isSold).length; soldCount.textContent = count; }
         function displayMessage(msg) { if (messageArea) { messageArea.textContent = msg; } else { console.warn("Área de mensajes no encontrada, mensaje:", msg); } }
         function getPatternFriendlyName(patternValue) { switch (patternValue) { case 'full_card': return 'Cartón Lleno'; case 'line': return 'Línea Recta'; case 'corners': return 'Cuatro Esquinas'; default: return patternValue; } }
         function updateUI() { console.log(`--- Actualizando UI --- Estado: generated=${cardsAreGenerated}, active=${gameActive}, winners=${winners.length}, pattern=${currentGamePattern}`); const elementsToCheck = { generateForSaleButton, startRoundButton, numberInput, callButton, resetEventButton, cardsDisplayArea, gamePatternSelect, lastCalledNumberDisplay, printCardsButton }; for (const key in elementsToCheck) { if (!elementsToCheck[key]) { console.error(`Error UI Crítico: Elemento DOM '${key}' no encontrado durante updateUI.`); displayMessage(`ERROR CRÍTICO DE INTERFAZ: Falta ${key}. Intenta recargar o reiniciar.`); if(document.getElementById('resetEventButton')) document.getElementById('resetEventButton').disabled = false; return; } } try { generateForSaleButton.disabled = gameActive; startRoundButton.disabled = !cardsAreGenerated || gameActive; resetEventButton.disabled = gameActive; gamePatternSelect.disabled = gameActive; printCardsButton.disabled = !cardsAreGenerated || gameActive; const callControlsDisabled = !gameActive; numberInput.disabled = callControlsDisabled; callButton.disabled = callControlsDisabled; if (gameActive) { startRoundButton.textContent = 'Sorteo en Curso'; startRoundButton.classList.remove('bg-green-600', 'hover:bg-green-700'); startRoundButton.classList.add('bg-yellow-600', 'hover:bg-yellow-700'); } else if (cardsAreGenerated) { startRoundButton.textContent = (winners && winners.length > 0) ? 'Siguiente Sorteo' : 'Iniciar Sorteo'; startRoundButton.classList.remove('bg-yellow-600', 'hover:bg-yellow-700'); startRoundButton.classList.add('bg-green-600', 'hover:bg-green-700'); } else { startRoundButton.textContent = 'Iniciar Sorteo'; startRoundButton.classList.remove('bg-yellow-600', 'hover:bg-yellow-700'); startRoundButton.classList.add('bg-green-600', 'hover:bg-green-700'); } const cardElements = cardsDisplayArea.querySelectorAll('.bingo-card'); cardElements.forEach(el => { el.removeEventListener('click', handleCardClick); if (!gameActive) { el.addEventListener('click', handleCardClick); el.classList.remove('disabled-card'); el.style.cursor = 'pointer'; } else { el.classList.add('disabled-card'); el.style.cursor = 'default'; } }); console.log("--- Actualización de UI completada ---"); } catch (error) { console.error("Error durante la actualización de la UI:", error); displayMessage("Error al actualizar la interfaz de usuario."); } }
+
+        // --- Funciones de Reseteo y Compartir ---
         function resetEvent() { if (confirm("¿Estás REALMENTE SEGURO? ¡Se BORRARÁN TODOS los datos guardados (cartones, ventas, sorteos) y se RECARGARÁ la página! Esta acción no se puede deshacer.")) { const enteredPassword = prompt("Por seguridad, ingresa la clave para reiniciar el evento:"); if (enteredPassword === null) { displayMessage("Reinicio cancelado."); return; } if (enteredPassword === RESET_PASSWORD) { console.log("--- Iniciando reseteo de evento v26 (Clave correcta) ---"); try { sessionStorage.setItem(RESET_FLAG_KEY, 'true'); displayMessage("Clave correcta. Borrando datos y recargando la página..."); console.log("Bandera de reseteo puesta en sessionStorage. Recargando página..."); location.reload(true); } catch (error) { console.error("Error durante el proceso de reseteo (antes de recargar):", error); displayMessage("Error al intentar reiniciar. Intenta recargar manualmente (F5)."); sessionStorage.removeItem(RESET_FLAG_KEY); } } else { console.warn("Intento de reinicio de evento con clave incorrecta."); displayMessage("Clave incorrecta. Reinicio cancelado."); } } else { displayMessage("Reinicio cancelado por el usuario."); } }
         function showShareOptions(cardId, buyerName, buyerPhone) { if (!shareModal || typeof html2canvas === 'undefined') { console.error("Modal de compartir o librería html2canvas no están listos."); displayMessage("Error: No se puede preparar la opción de compartir."); return; } const cardElement = cardsDisplayArea.querySelector(`.bingo-card[data-card-id="${cardId}"]`); if (!cardElement) { console.error(`Elemento DOM para Cartón ${cardId} no encontrado.`); displayMessage("Error: No se encontró el cartón para generar la imagen."); return; } shareImagePreview.src = ''; shareImagePreview.classList.add('hidden'); shareLoading.classList.remove('hidden'); shareLoading.textContent = "Generando imagen..."; downloadImageButton.disabled = true; shareWhatsAppButton.disabled = true; shareImageDataUrl = null; shareCardInfo = { cardId, buyerName, buyerPhone }; shareModal.classList.remove('hidden'); console.log(`Iniciando generación de imagen para cartón ${cardId}...`); const options = { backgroundColor: "#ffffff", useCORS: true }; html2canvas(cardElement, options).then(canvas => { console.log(`Imagen generada correctamente para cartón ${cardId}`); shareLoading.classList.add('hidden'); try { shareImageDataUrl = canvas.toDataURL('image/png'); shareImagePreview.src = shareImageDataUrl; shareImagePreview.classList.remove('hidden'); downloadImageButton.disabled = false; shareWhatsAppButton.disabled = false; } catch (e) { console.error("Error al convertir canvas a DataURL:", e); displayMessage("Error al generar la imagen final."); shareLoading.textContent = "Error al generar."; shareLoading.classList.remove('hidden'); } }).catch(err => { console.error("Error durante la ejecución de html2canvas:", err); displayMessage("Error al capturar la imagen del cartón."); shareLoading.textContent = "Error al capturar."; shareLoading.classList.remove('hidden'); }); }
         function downloadCardImage() { if (!shareImageDataUrl) { console.error("No hay URL de imagen para descargar."); return; } const link = document.createElement('a'); link.href = shareImageDataUrl; link.download = `bingo_carton_${shareCardInfo.cardId || 'id'}.png`; document.body.appendChild(link); link.click(); document.body.removeChild(link); console.log(`Imagen del cartón ${shareCardInfo.cardId} descargada.`); }
         function shareCardViaWhatsApp() { const { cardId, buyerName, buyerPhone } = shareCardInfo; if (!buyerPhone) { displayMessage("No hay número de teléfono registrado para este comprador."); alert("No se ingresó un número de teléfono al vender este cartón."); return; } const cleanedPhone = buyerPhone.replace(/\D/g, ''); if (!cleanedPhone) { displayMessage("El número de teléfono registrado no es válido."); return; } const message = `¡Hola ${buyerName || ''}! Aquí tienes tu cartón de BINGO #${cardId}. ¡Mucha suerte! No olvides adjuntar la imagen que descargaste.`; const encodedMessage = encodeURIComponent(message); const whatsappUrl = `https://wa.me/${cleanedPhone}?text=${encodedMessage}`; console.log(`Abriendo WhatsApp para ${cleanedPhone} (Cartón ${cardId})`); window.open(whatsappUrl, '_blank'); }
         function closeShareModal() { if (shareModal) { shareModal.classList.add('hidden'); shareImagePreview.src = ''; shareImageDataUrl = null; shareCardInfo = {}; } }
+
+        // --- Función de Impresión ---
         function printAllCards() { console.log("Iniciando proceso de impresión de todos los cartones..."); displayMessage("Preparando vista de impresión..."); setTimeout(() => { window.print(); displayMessage("Diálogo de impresión abierto. Usa 'Guardar como PDF' si necesitas un archivo digital."); }, 100); }
+
+        // --- Inicialización de la Aplicación ---
         function initializeApp() { console.log("--- Inicializando Aplicación Bingo v26 ---"); try { const resetFlag = sessionStorage.getItem(RESET_FLAG_KEY); let performLoad = true; if (resetFlag === 'true') { console.log("Bandera de reseteo detectada en sessionStorage."); sessionStorage.removeItem(RESET_FLAG_KEY); clearLocalStorage(); performLoad = false; console.log("Reseteo post-recarga completado (localStorage limpiado)."); } generateForSaleButton = document.getElementById('generateForSaleButton'); startRoundButton = document.getElementById('startRoundButton'); numberInput = document.getElementById('numberInput'); callButton = document.getElementById('callButton'); resetEventButton = document.getElementById('resetEventButton'); messageArea = document.getElementById('messageArea'); calledNumbersDisplay = document.getElementById('calledNumbersDisplay'); calledCount = document.getElementById('calledCount'); soldCount = document.getElementById('soldCount'); cardsDisplayArea = document.getElementById('cardsDisplayArea'); saleInfoModal = document.getElementById('saleInfoModal'); modalTitle = document.getElementById('modalTitle'); modalCardIdInput = document.getElementById('modalCardId'); modalSaleFields = document.getElementById('modalSaleFields'); modalInfoFields = document.getElementById('modalInfoFields'); buyerNameInput = document.getElementById('buyerName'); buyerPhoneInput = document.getElementById('buyerPhone'); infoBuyerName = document.getElementById('infoBuyerName'); infoBuyerPhone = document.getElementById('infoBuyerPhone'); saveSaleButton = document.getElementById('saveSaleButton'); cancelModalButton = document.getElementById('cancelModalButton'); winnerModal = document.getElementById('winnerModal'); winnerModalText = document.getElementById('winnerModalText'); closeWinnerModalButton = document.getElementById('closeWinnerModalButton'); shareModal = document.getElementById('shareModal'); shareImagePreviewContainer = document.getElementById('shareImagePreviewContainer'); shareLoading = document.getElementById('shareLoading'); shareImagePreview = document.getElementById('shareImagePreview'); downloadImageButton = document.getElementById('downloadImageButton'); shareWhatsAppButton = document.getElementById('shareWhatsAppButton'); closeShareModalButton = document.getElementById('closeShareModalButton'); gamePatternSelect = document.getElementById('gamePatternSelect'); lastCalledNumberDisplay = document.getElementById('lastCalledNumberDisplay'); printCardsButton = document.getElementById('printCardsButton'); const requiredElements = { generateForSaleButton, startRoundButton, numberInput, callButton, resetEventButton, messageArea, calledNumbersDisplay, calledCount, soldCount, cardsDisplayArea, saleInfoModal, modalTitle, modalCardIdInput, modalSaleFields, modalInfoFields, buyerNameInput, buyerPhoneInput, infoBuyerName, infoBuyerPhone, saveSaleButton, cancelModalButton, winnerModal, winnerModalText, closeWinnerModalButton, shareModal, shareImagePreviewContainer, shareLoading, shareImagePreview, downloadImageButton, shareWhatsAppButton, closeShareModalButton, gamePatternSelect, lastCalledNumberDisplay, printCardsButton }; for(const key in requiredElements) { if (!requiredElements[key]) { throw new Error(`Error fatal de inicialización: Elemento DOM '${key}' no encontrado.`); } } console.log("Todos los elementos DOM requeridos fueron encontrados."); let loaded = false; if (performLoad) { loaded = loadStateFromLocalStorage(); } if (loaded) { displayCardsForSale(allCardsData); updateCalledNumbersDisplay(); updateSoldCountDisplay(); if (gameActive) { prepareCardsForGame(); displayMessage(`Sorteo cargado y en curso. ${calledNumbers.size} números cantados.`); calledNumbers.forEach(num => markNumberOnCards(num)); const lastNum = Array.from(calledNumbers).pop(); if(lastNum && lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = lastNum; } else if (winners.length > 0) { displayMessage("Estado cargado. El último sorteo terminó. Presiona 'Siguiente Sorteo'."); } else if (cardsAreGenerated) { displayMessage("Estado cargado. Cartones listos. Presiona 'Iniciar Sorteo'."); } else { displayMessage("Bienvenido. Presiona 'Generar Cartones'."); } } else { displayMessage(resetFlag === 'true' ? "Evento reiniciado correctamente. Genera nuevos cartones." : "Bienvenido. Presiona 'Generar Cartones'."); updateSoldCountDisplay(); updateCalledNumbersDisplay(); cardsDisplayArea.innerHTML = '<p class="text-gray-500">No hay cartones generados.</p>'; } if (!gameActive && lastCalledNumberDisplay) { lastCalledNumberDisplay.textContent = '-'; } updateUI(); generateForSaleButton.addEventListener('click', handleGenerateForSale); startRoundButton.addEventListener('click', startNewRound); callButton.addEventListener('click', callNumber); resetEventButton.addEventListener('click', resetEvent); numberInput.addEventListener('keypress', function(event) { if (event.key === 'Enter' && gameActive) { event.preventDefault(); callNumber(); } }); saveSaleButton.addEventListener('click', saveSale); cancelModalButton.addEventListener('click', closeModal); closeWinnerModalButton.addEventListener('click', closeWinnerModal); downloadImageButton.addEventListener('click', downloadCardImage); shareWhatsAppButton.addEventListener('click', shareCardViaWhatsApp); closeShareModalButton.addEventListener('click', closeShareModal); printCardsButton.addEventListener('click', printAllCards); console.log("--- Inicialización de Bingo v26 completada exitosamente ---"); } catch (error) { console.error("!!! ERROR FATAL DURANTE LA INICIALIZACIÓN DE LA APLICACIÓN:", error); if (messageArea) { messageArea.textContent = `ERROR GRAVE AL INICIAR: ${error.message}. Intenta usar 'Nuevo Evento' o recargar la página (F5).`; messageArea.style.color = 'red'; } else { alert(`ERROR GRAVE AL INICIAR: ${error.message}. Revisa la consola (F12) e intenta recargar o usar 'Nuevo Evento'.`); } if(resetEventButton) { resetEventButton.disabled = false; console.log("Habilitando botón de reseteo debido a error de inicialización."); } } }
         document.addEventListener('DOMContentLoaded', initializeApp);
 
