@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BINGO - Centro de Hatillos (v13 - Revisado)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos CSS (Iguales a v12) */
+        body { font-family: 'Inter', sans-serif; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .bingo-card { border: 2px solid #6b7280; background-color: white; color: black; padding: 8px; border-radius: 8px; margin: 5px; width: 200px; display: inline-block; vertical-align: top; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; position: relative; }
+        .bingo-card:not(.sold-card):not(.disabled-card):hover { transform: translateY(-3px); box-shadow: 4px 4px 8px rgba(0,0,0,0.3); }
+        .sold-card { cursor: pointer; opacity: 0.6; border-color: #ef4444; }
+        .sold-card::after { content: 'VENDIDO'; position: absolute; top: 5px; right: 5px; background-color: rgba(239, 68, 68, 0.85); color: white; font-weight: bold; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; pointer-events: none; z-index: 2; }
+        .disabled-card { cursor: default !important; }
+        .bingo-card h3 { text-align: center; font-weight: bold; margin-bottom: 5px; color: #1f2937; }
+        .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; text-align: center; }
+        .bingo-grid div { border: 1px solid #d1d5db; padding: 2px 0; font-weight: bold; min-height: 25px; display: flex; align-items: center; justify-content: center; background-color: #f9fafb; position: relative; transition: color 0.3s ease; }
+        .bingo-grid .header { font-weight: bold; background-color: #e5e7eb; color: #1f2937; }
+        .bingo-grid .free-space { background-color: #d1fae5; color: #065f46; font-style: italic; }
+        .marked-number { color: #9ca3af; }
+        .marked-number::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 18px; height: 18px; background-color: rgba(239, 68, 68, 0.6); border-radius: 50%; pointer-events: none; z-index: 1; animation: scaleIn 0.2s ease-out; }
+        #cardsDisplayArea { max-height: 400px; overflow-y: auto; background-color: #374151; border: 1px solid #4b5563; padding: 10px; border-radius: 8px; margin-top: 15px; text-align: center; }
+        #calledNumbersDisplay .called-number { display: inline-block; background-color: #4b5563; color: white; padding: 3px 9px; margin: 3px; border-radius: 16px; font-size: 0.95em; min-width: 30px; text-align: center; box-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+        .modal { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fadeIn 0.3s ease-out; }
+        .modal-content { background-color: #1f2937; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); width: 90%; max-width: 400px; color: #d1d5db; animation: scaleIn 0.3s ease-out; }
+        .modal-content h2 { color: white; font-size: 1.5em; margin-bottom: 15px; text-align: center; }
+        .modal-content label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .modal-content input { width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #4b5563; background-color: #374151; color: white; }
+        .info-display p { margin-bottom: 8px; }
+        .info-display strong { color: #9ca3af; }
+        .modal-buttons { display: flex; justify-content: space-around; margin-top: 20px; }
+        #winnerModal .modal-content { background: linear-gradient(145deg, #15803d, #16a34a); color: white; border: 3px solid #facc15; max-width: 500px; }
+        #winnerModal h2 { font-size: 2.5em; color: #fef08a; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 20px; }
+        #winnerModal p { font-size: 1.2em; margin-bottom: 10px; line-height: 1.6; }
+        #winnerModal strong { color: #fef9c3; font-weight: 600; }
+        #winnerModal button { background-color: #facc15; color: #1f2937; font-weight: bold; }
+        #winnerModal button:hover { background-color: #fde047; }
+        button:disabled { opacity: 0.5; cursor: not-allowed !important; }
+        button:disabled:hover { filter: brightness(100%); }
+    </style>
+</head>
+<body class="dark bg-gray-900 text-gray-300 flex items-center justify-center min-h-screen px-4 py-8">
+    <div class="bg-gray-800 p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-5xl">
+        <div class="text-center mb-6">
+             <h1 class="text-4xl sm:text-5xl font-bold text-white uppercase tracking-wider">BINGO</h1>
+             <p class="text-lg text-gray-400 mt-1">Centro de Hatillos San Sebastián</p> </div>
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-6 border-b border-gray-700 pb-6">
+            <button id="generateForSaleButton" title="Genera 100 cartones nuevos (¡Borra ventas y sorteos anteriores!)" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800">Generar Cartones</button>
+            <button id="startRoundButton" title="Inicia el primer sorteo o el siguiente con los cartones ya vendidos" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800" disabled>Iniciar Sorteo</button>
+            <div class="flex w-full sm:w-auto gap-2">
+                <input type="number" id="numberInput" placeholder="Número" min="1" max="75" class="flex-grow form-input bg-gray-700 border border-gray-600 text-white rounded-md p-2 text-center focus:ring-blue-500 focus:border-blue-500" disabled>
+                <button id="callButton" title="Canta el número ingresado" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800" disabled>Cantar</button>
+            </div>
+            <button id="resetEventButton" title="BORRA TODOS los datos guardados y RECARGA LA PÁGINA. ¡Para empezar un evento desde cero!" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800">Nuevo Evento (Borrar y Recargar)</button>
+        </div>
+
+        <div id="messageArea" class="text-center text-yellow-400 min-h-[1.5em] mb-4 text-sm sm:text-base">Cargando estado...</div>
+
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-center text-gray-400 mb-2">Números Cantados (Sorteo Actual): <span id="calledCount">0</span>/75 (<span id="soldCount">0</span>/100 Cartones Vendidos)</h2>
+            <div id="calledNumbersDisplay" class="bg-gray-900 p-3 rounded-md min-h-[60px] text-center text-base leading-relaxed border border-gray-700">
+                <span class="text-gray-500">- Esperando números -</span>
+            </div>
+        </div>
+
+        <div id="cardsDisplayAreaContainer" class="mt-6">
+            <h2 class="text-lg font-semibold text-center text-gray-400 mb-2">Visor de Cartones (Clic para Vender o Ver Info - Solo antes de iniciar sorteos)</h2>
+            <div id="cardsDisplayArea">
+                <p class="text-gray-500">Aquí se mostrarán los cartones generados...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="saleInfoModal" class="modal hidden"> <div class="modal-content"> <h2 id="modalTitle">Cartón ID: --</h2> <input type="hidden" id="modalCardId"> <div id="modalSaleFields"> <div><label for="buyerName">Nombre del Comprador:</label><input type="text" id="buyerName" placeholder="Nombre Apellido"></div> <div><label for="buyerPhone">Teléfono del Comprador:</label><input type="tel" id="buyerPhone" placeholder="8888-8888"></div> </div> <div id="modalInfoFields" class="hidden info-display"> <p><strong>Comprador:</strong> <span id="infoBuyerName"></span></p> <p><strong>Teléfono:</strong> <span id="infoBuyerPhone"></span></p> </div> <div class="modal-buttons"> <button id="saveSaleButton" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out">Guardar Venta</button> <button id="cancelModalButton" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out">Cancelar</button> </div> </div> </div>
+    <div id="winnerModal" class="modal hidden"> <div class="modal-content"> <h2>¡ B I N G O !</h2> <p id="winnerModalText">Información del ganador...</p> <div class="modal-buttons"> <button id="closeWinnerModalButton" class="py-2 px-6 rounded-md transition duration-150 ease-in-out">¡Entendido!</button> </div> </div> </div>
+
+    <script>
+        // --- Constantes y Configuración ---
+        const NUM_CARDS = 100; const MIN_NUMBER = 1; const MAX_NUMBER = 75;
+        const BINGO_RANGES = { B: { min: 1, max: 15, count: 5 }, I: { min: 16, max: 30, count: 5 }, N: { min: 31, max: 45, count: 4 }, G: { min: 46, max: 60, count: 5 }, O: { min: 61, max: 75, count: 5 } };
+        const BINGO_COLUMNS = ['B', 'I', 'N', 'G', 'O'];
+        // *** NUEVAS CLAVES PARA v13 ***
+        const STORAGE_KEYS = { cards: 'bingoState_allCardsData_v13', called: 'bingoState_calledNumbers_v13', active: 'bingoState_gameActive_v13', generated: 'bingoState_cardsGenerated_v13', winners: 'bingoState_winners_v13' };
+        const RESET_FLAG_KEY = 'bingoResetFlag_v13'; // Actualizado
+
+        // --- Variables de Estado Globales ---
+        let allCardsData = []; let cardsForGame = {}; let calledNumbers = new Set();
+        let gameActive = false; let winners = []; let cardsAreGenerated = false;
+        let currentEditingCardId = null;
+
+        // --- Referencias DOM Globales ---
+        let generateForSaleButton, startRoundButton, numberInput, callButton, resetEventButton, messageArea,
+            calledNumbersDisplay, calledCount, soldCount, cardsDisplayArea, saleInfoModal, modalTitle,
+            modalCardIdInput, modalSaleFields, modalInfoFields, buyerNameInput, buyerPhoneInput,
+            infoBuyerName, infoBuyerPhone, saveSaleButton, cancelModalButton, winnerModal,
+            winnerModalText, closeWinnerModalButton;
+
+        // --- Funciones de Persistencia (localStorage) ---
+        function saveStateToLocalStorage() { try { if (cardsAreGenerated) { localStorage.setItem(STORAGE_KEYS.cards, JSON.stringify(allCardsData)); localStorage.setItem(STORAGE_KEYS.called, JSON.stringify(Array.from(calledNumbers))); localStorage.setItem(STORAGE_KEYS.active, JSON.stringify(gameActive)); localStorage.setItem(STORAGE_KEYS.generated, JSON.stringify(cardsAreGenerated)); localStorage.setItem(STORAGE_KEYS.winners, JSON.stringify(winners)); } } catch (error) { console.error("Error al guardar estado:", error); } }
+        function loadStateFromLocalStorage() { console.log("--- Intentando cargar estado v13 ---"); try { const savedGenerated = localStorage.getItem(STORAGE_KEYS.generated); if (savedGenerated && JSON.parse(savedGenerated)) { cardsAreGenerated = true; const savedCards = localStorage.getItem(STORAGE_KEYS.cards); allCardsData = savedCards ? JSON.parse(savedCards) : []; const savedCalled = localStorage.getItem(STORAGE_KEYS.called); calledNumbers = savedCalled ? new Set(JSON.parse(savedCalled)) : new Set(); const savedActive = localStorage.getItem(STORAGE_KEYS.active); const savedWinners = localStorage.getItem(STORAGE_KEYS.winners); winners = savedWinners ? JSON.parse(savedWinners) : []; let loadedGameActive = savedActive ? JSON.parse(savedActive) : false; if (loadedGameActive && calledNumbers.size === 0 && winners.length === 0) { gameActive = false; console.warn("Estado activo inválido corregido a inactivo."); } else { gameActive = loadedGameActive; } console.log("Estado cargado v13.", { cardsAreGenerated, gameActive, calledNumbers: calledNumbers.size, winners: winners.length }); return true; } else { console.log("No se encontró estado generado (v13) válido."); clearLocalStorageVars(); } } catch (error) { console.error("Error al cargar estado v13:", error); clearLocalStorage(); clearLocalStorageVars(); } console.log("--- Carga de estado v13 finalizada ---"); return false; }
+        function clearLocalStorageVars() { cardsAreGenerated = false; allCardsData = []; calledNumbers = new Set(); gameActive = false; winners = []; cardsForGame = {}; console.log("Variables globales reseteadas."); }
+        function clearLocalStorage() { console.log("--- Limpiando localStorage v13 ---"); for (const key in STORAGE_KEYS) { localStorage.removeItem(STORAGE_KEYS[key]); } clearLocalStorageVars(); console.log("--- Limpieza localStorage v13 completada ---"); }
+
+        // --- Funciones Generación Cartones ---
+        function getRandomNumbersInRange(min, max, count) { const numbers = new Set(); const possibleNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i); while (numbers.size < count && possibleNumbers.length > 0) { const randomIndex = Math.floor(Math.random() * possibleNumbers.length); numbers.add(possibleNumbers.splice(randomIndex, 1)[0]); } return Array.from(numbers).sort((a, b) => a - b); }
+        function generateBingoCardData(cardId) { const cardNumbers = {}; BINGO_COLUMNS.forEach(col => { const range = BINGO_RANGES[col]; cardNumbers[col] = getRandomNumbersInRange(range.min, range.max, range.count); }); return { id: cardId, numbers: cardNumbers, isSold: false, buyerName: '', buyerPhone: '' }; }
+        function generateAllCardsData() { allCardsData = []; for (let i = 1; i <= NUM_CARDS; i++) { allCardsData.push(generateBingoCardData(i)); } cardsAreGenerated = true; }
+
+        // --- Funciones Visualización ---
+        function displayCardsForSale(cardsData) { if (!cardsDisplayArea) return; cardsDisplayArea.innerHTML = ''; if (!cardsData || cardsData.length === 0) { cardsDisplayArea.innerHTML = '<p class="text-gray-500">No hay cartones generados.</p>'; return; } cardsData.forEach(card => { const cardElement = document.createElement('div'); cardElement.className = `bingo-card ${card.isSold ? 'sold-card' : ''}`; cardElement.dataset.cardId = card.id; let gridHTML = `<h3>Cartón ID: ${card.id}</h3><div class="bingo-grid">`; BINGO_COLUMNS.forEach(col => gridHTML += `<div class="header">${col}</div>`); for (let i = 0; i < 5; i++) { BINGO_COLUMNS.forEach((col, j) => { if (i === 2 && j === 2) { gridHTML += `<div class="free-space">LIBRE</div>`; } else { const index = (col === 'N' && i >= 2) ? i - 1 : i; const number = card.numbers[col][index] || ''; const isMarked = card.isSold && calledNumbers.has(number); gridHTML += `<div class="${isMarked ? 'marked-number' : ''}">${number}</div>`; } }); } gridHTML += `</div>`; cardElement.innerHTML = gridHTML; cardsDisplayArea.appendChild(cardElement); }); updateSoldCountDisplay(); }
+
+        // --- Funciones Venta, Info y Modal ---
+        function handleCardClick(event) { const cardElement = event.currentTarget; const cardId = parseInt(cardElement.dataset.cardId); const cardData = allCardsData.find(card => card.id === cardId); if (!cardData || gameActive) return; if (cardData.isSold) { openInfoModal(cardData); } else { openSaleModal(cardId); } }
+        function openSaleModal(cardId) { currentEditingCardId = cardId; modalTitle.textContent = `Vender Cartón ID: ${cardId}`; modalCardIdInput.value = cardId; modalSaleFields.classList.remove('hidden'); modalInfoFields.classList.add('hidden'); saveSaleButton.classList.remove('hidden'); buyerNameInput.value = ''; buyerPhoneInput.value = ''; saleInfoModal.classList.remove('hidden'); buyerNameInput.focus(); }
+        function openInfoModal(cardData) { currentEditingCardId = cardData.id; modalTitle.textContent = `Info Cartón ID: ${cardData.id}`; modalSaleFields.classList.add('hidden'); modalInfoFields.classList.remove('hidden'); saveSaleButton.classList.add('hidden'); infoBuyerName.textContent = cardData.buyerName || '(No registrado)'; infoBuyerPhone.textContent = cardData.buyerPhone || '(No registrado)'; saleInfoModal.classList.remove('hidden'); }
+        function closeModal() { currentEditingCardId = null; saleInfoModal.classList.add('hidden'); }
+        function saveSale() { const cardId = currentEditingCardId; const name = buyerNameInput.value.trim(); const phone = buyerPhoneInput.value.trim(); if (cardId === null) { closeModal(); return; } const cardIndex = allCardsData.findIndex(card => card.id === cardId); if (cardIndex === -1) { closeModal(); return; } allCardsData[cardIndex].isSold = true; allCardsData[cardIndex].buyerName = name; allCardsData[cardIndex].buyerPhone = phone; const cardElement = cardsDisplayArea.querySelector(`.bingo-card[data-card-id="${cardId}"]`); if (cardElement) { cardElement.classList.add('sold-card'); } updateSoldCountDisplay(); displayMessage(`Cartón ${cardId} vendido a ${name || 'Comprador'}.`); closeModal(); saveStateToLocalStorage(); }
+        function closeWinnerModal() { winnerModal.classList.add('hidden'); }
+
+        // --- Funciones Marcar/Limpiar Números ---
+        function markNumberOnCards(number) { if (!cardsDisplayArea) return; const targetNumberStr = String(number); const soldCards = cardsDisplayArea.querySelectorAll('.bingo-card.sold-card'); soldCards.forEach(cardElement => { const numberDivs = cardElement.querySelectorAll('.bingo-grid div:not(.header):not(.free-space)'); numberDivs.forEach(div => { if (div.textContent === targetNumberStr) { div.classList.add('marked-number'); } }); }); }
+        function clearAllCardMarkings() { if (!cardsDisplayArea) return; const markedDivs = cardsDisplayArea.querySelectorAll('.marked-number'); markedDivs.forEach(div => { div.classList.remove('marked-number'); }); console.log("Marcas de números limpiadas."); }
+
+        // --- Funciones Control del Juego ---
+        function prepareCardsForGame() { cardsForGame = {}; if (!allCardsData) return 0; const soldCards = allCardsData.filter(card => card.isSold); soldCards.forEach(cardData => { const numbersSet = new Set(); Object.values(cardData.numbers).forEach(colArr => colArr.forEach(num => numbersSet.add(num))); cardsForGame[cardData.id] = numbersSet; }); const count = Object.keys(cardsForGame).length; console.log(`Preparados ${count} cartones vendidos.`); return count; }
+        function handleGenerateForSale() {
+            // Confirmación con énfasis
+            if (cardsAreGenerated && !confirm("¿Generar NUEVO set? ¡Se PERDERÁN ventas y sorteos anteriores!")) {
+                 return;
+            }
+            displayMessage("Generando cartones...");
+            clearLocalStorage(); // Limpia storage y variables
+            generateAllCardsData();
+            displayCardsForSale(allCardsData);
+            updateCalledNumbersDisplay();
+            updateSoldCountDisplay();
+            updateUI();
+            displayMessage(`¡${NUM_CARDS} cartones generados! Clic para vender.`);
+            saveStateToLocalStorage(); // Guarda estado inicial nuevo
+        }
+        function startNewRound() { if (!cardsAreGenerated) { displayMessage("Error: Genera cartones primero."); return; } if (gameActive) { displayMessage("Sorteo en curso."); return; } clearAllCardMarkings(); displayMessage("Iniciando sorteo..."); const soldCardsCount = prepareCardsForGame(); if (soldCardsCount === 0) { displayMessage("No hay cartones vendidos."); return; } calledNumbers = new Set(); winners = []; gameActive = true; updateCalledNumbersDisplay(); updateUI(); displayMessage(`Nuevo sorteo con ${soldCardsCount} cartones. Ingrese número.`); numberInput.focus(); saveStateToLocalStorage(); }
+        function callNumber() { if (!gameActive) { displayMessage("Sorteo no activo."); return; } const numStr = numberInput.value.trim(); if (!numStr) { displayMessage("Ingrese número."); numberInput.focus(); return; } const num = parseInt(numStr, 10); if (isNaN(num) || num < MIN_NUMBER || num > MAX_NUMBER) { displayMessage(`Número inválido (${MIN_NUMBER}-${MAX_NUMBER}).`); numberInput.value = ''; numberInput.focus(); return; } if (calledNumbers.has(num)) { displayMessage(`Número ${num} ya cantado.`); numberInput.value = ''; numberInput.focus(); return; } calledNumbers.add(num); updateCalledNumbersDisplay(); markNumberOnCards(num); displayMessage(`Número ${num} cantado. Verificando...`); numberInput.value = ''; numberInput.focus(); saveStateToLocalStorage(); setTimeout(() => { checkForWinner(num); if(gameActive) { displayMessage(`Esperando número. ${calledNumbers.size} cantados.`); } }, 50); }
+        function checkForWinner(lastNumberCalled) { let newlyWon = false; for (const cardIdStr in cardsForGame) { const cardId = parseInt(cardIdStr); if (winners.includes(cardId)) { continue; } const cardNumbersSet = cardsForGame[cardId]; let allNumbersCalled = true; for (const numberOnCard of cardNumbersSet) { if (!calledNumbers.has(numberOnCard)) { allNumbersCalled = false; break; } } if (allNumbersCalled) { if (!winners.includes(cardId)) { winners.push(cardId); newlyWon = true; console.log(`Bingo: Cartón ${cardId}`); } } } if (newlyWon) { announceWinner(lastNumberCalled); } }
+        function announceWinner(winningNumber) { gameActive = false; console.log("Bingo! Anunciando ganador."); const winnerDetails = winners.map(id => { const cardData = allCardsData.find(c => c.id === id); let detail = `<strong>Cartón ${id}`; if (cardData) { detail += ` (Vendido a: ${cardData.buyerName || 'Comprador'})`; } else { detail += ` (Error)`; } detail += `</strong>`; return detail; }).join('<br>'); let winnerPopupText = `¡BINGO con el número <strong>${winningNumber}</strong>!<br><br>Ganador(es):<br>${winnerDetails}`; winnerModalText.innerHTML = winnerPopupText; winnerModal.classList.remove('hidden'); updateUI(); displayMessage("¡Sorteo terminado! 'Siguiente Sorteo' o 'Nuevo Evento'."); saveStateToLocalStorage(); }
+
+        // --- Funciones Auxiliares ---
+        function updateCalledNumbersDisplay() { if (!calledNumbersDisplay || !calledCount) return; const sortedNumbers = Array.from(calledNumbers).sort((a, b) => a - b); calledCount.textContent = sortedNumbers.length; if (sortedNumbers.length === 0) { calledNumbersDisplay.innerHTML = '<span class="text-gray-500">- Esperando números -</span>'; } else { calledNumbersDisplay.innerHTML = sortedNumbers.map(num => `<span class="called-number">${num}</span>`).join(' '); } }
+        function updateSoldCountDisplay() { if (!soldCount || !allCardsData) return; const count = allCardsData.filter(card => card.isSold).length; soldCount.textContent = count; }
+        function displayMessage(msg) { if (messageArea) messageArea.textContent = msg; }
+        function updateUI() { console.log(`UI Update: generated=${cardsAreGenerated}, active=${gameActive}, winners=${winners.length}`); if (!generateForSaleButton || !startRoundButton || !numberInput || !callButton || !resetEventButton || !cardsDisplayArea) { console.error("Error UI: Elementos DOM no encontrados."); displayMessage("ERROR CRÍTICO: Elementos de interfaz no encontrados."); if(resetEventButton) resetEventButton.disabled = false; return; } try { generateForSaleButton.disabled = gameActive; startRoundButton.disabled = !cardsAreGenerated || gameActive; numberInput.disabled = !gameActive; callButton.disabled = !gameActive; resetEventButton.disabled = gameActive; if (gameActive) { startRoundButton.textContent = 'Sorteo en Curso'; startRoundButton.classList.remove('bg-green-600', 'hover:bg-green-700'); startRoundButton.classList.add('bg-yellow-600', 'hover:bg-yellow-700'); } else if (cardsAreGenerated) { startRoundButton.textContent = (winners && winners.length > 0) ? 'Siguiente Sorteo' : 'Iniciar Sorteo'; startRoundButton.classList.remove('bg-yellow-600', 'hover:bg-yellow-700'); startRoundButton.classList.add('bg-green-600', 'hover:bg-green-700'); } else { startRoundButton.textContent = 'Iniciar Sorteo'; startRoundButton.classList.remove('bg-yellow-600', 'hover:bg-yellow-700'); startRoundButton.classList.add('bg-green-600', 'hover:bg-green-700'); } const cardElements = cardsDisplayArea.querySelectorAll('.bingo-card'); cardElements.forEach(el => { el.removeEventListener('click', handleCardClick); if (!gameActive) { el.addEventListener('click', handleCardClick); el.classList.remove('disabled-card'); el.style.cursor = 'pointer'; } else { el.classList.add('disabled-card'); el.style.cursor = 'default'; } }); console.log("UI Actualizada."); } catch (error) { console.error("Error updateUI:", error); displayMessage("Error en la interfaz de usuario."); } } // Mensaje de error corregido
+
+        /** Función para Reiniciar Evento (Usa sessionStorage y Recarga Forzada) */
+        function resetEvent() {
+             // Confirmación con énfasis
+            if (confirm("¿Seguro? ¡Se BORRARÁN TODOS los datos y RECARGARÁ la página! Esta acción no se puede deshacer.")) {
+                console.log("--- Iniciando reseteo de evento v13 ---");
+                try {
+                    sessionStorage.setItem(RESET_FLAG_KEY, 'true'); // Poner bandera
+                    displayMessage("Borrando datos y recargando...");
+                    console.log("Bandera de reseteo puesta. Recargando página...");
+                    location.reload(true); // Forzar recarga
+                } catch (error) {
+                    console.error("Error durante el proceso de reseteo:", error);
+                    displayMessage("Error al intentar reiniciar. Intenta borrar manualmente el LocalStorage y recargar (F12 > Aplicación > Local Storage).");
+                    sessionStorage.removeItem(RESET_FLAG_KEY); // Limpiar bandera si falla
+                }
+            }
+        }
+
+        // --- Inicialización ---
+        function initializeApp() {
+            console.log("--- Inicializando Bingo v13 ---"); // Versión actualizada
+            try {
+                // Comprobar bandera de reseteo al inicio
+                const resetFlag = sessionStorage.getItem(RESET_FLAG_KEY);
+                let performLoad = true;
+
+                if (resetFlag === 'true') {
+                    console.log("Detectada bandera de reseteo.");
+                    sessionStorage.removeItem(RESET_FLAG_KEY); // Quitar la bandera
+                    clearLocalStorage(); // Limpiar localStorage AHORA
+                    performLoad = false;
+                    console.log("Reseteo completado post-recarga. Iniciando limpio.");
+                }
+
+                // Asignar referencias DOM
+                generateForSaleButton = document.getElementById('generateForSaleButton');
+                startRoundButton = document.getElementById('startRoundButton');
+                numberInput = document.getElementById('numberInput');
+                callButton = document.getElementById('callButton');
+                resetEventButton = document.getElementById('resetEventButton');
+                messageArea = document.getElementById('messageArea');
+                calledNumbersDisplay = document.getElementById('calledNumbersDisplay');
+                calledCount = document.getElementById('calledCount');
+                soldCount = document.getElementById('soldCount');
+                cardsDisplayArea = document.getElementById('cardsDisplayArea');
+                saleInfoModal = document.getElementById('saleInfoModal');
+                modalTitle = document.getElementById('modalTitle');
+                modalCardIdInput = document.getElementById('modalCardId');
+                modalSaleFields = document.getElementById('modalSaleFields');
+                modalInfoFields = document.getElementById('modalInfoFields');
+                buyerNameInput = document.getElementById('buyerName');
+                buyerPhoneInput = document.getElementById('buyerPhone');
+                infoBuyerName = document.getElementById('infoBuyerName');
+                infoBuyerPhone = document.getElementById('infoBuyerPhone');
+                saveSaleButton = document.getElementById('saveSaleButton');
+                cancelModalButton = document.getElementById('cancelModalButton');
+                winnerModal = document.getElementById('winnerModal');
+                winnerModalText = document.getElementById('winnerModalText');
+                closeWinnerModalButton = document.getElementById('closeWinnerModalButton');
+
+                // Verificar elementos DOM
+                const requiredElements = { generateForSaleButton, startRoundButton, numberInput, callButton, resetEventButton, messageArea, calledNumbersDisplay, calledCount, soldCount, cardsDisplayArea, saleInfoModal, modalTitle, modalCardIdInput, modalSaleFields, modalInfoFields, buyerNameInput, buyerPhoneInput, infoBuyerName, infoBuyerPhone, saveSaleButton, cancelModalButton, winnerModal, winnerModalText, closeWinnerModalButton };
+                for(const key in requiredElements) { if (!requiredElements[key]) { throw new Error(`Error fatal: Elemento DOM '${key}' no encontrado.`); } }
+                console.log("Elementos DOM encontrados.");
+
+                // Carga estado SI NO se hizo reseteo
+                let loaded = false;
+                if (performLoad) {
+                    loaded = loadStateFromLocalStorage();
+                }
+
+                // Actualiza UI visual inicial
+                if (loaded) {
+                     displayCardsForSale(allCardsData);
+                     updateCalledNumbersDisplay();
+                     updateSoldCountDisplay();
+                     if (gameActive) { prepareCardsForGame(); displayMessage(`Sorteo cargado. ${calledNumbers.size} cantados.`); }
+                     else if (winners.length > 0) { displayMessage("Último sorteo terminado."); }
+                     else if (cardsAreGenerated) { displayMessage("Cartones listos."); }
+                     else { displayMessage("Bienvenido."); }
+                } else {
+                    displayMessage(resetFlag === 'true' ? "Evento reiniciado. Genera nuevos cartones." : "Bienvenido. Presiona 'Generar Cartones'.");
+                    updateSoldCountDisplay();
+                    updateCalledNumbersDisplay();
+                    cardsDisplayArea.innerHTML = '<p class="text-gray-500">No hay cartones.</p>';
+                }
+
+                // Actualiza estado de botones y listeners
+                updateUI();
+
+                // Asignar listeners
+                generateForSaleButton.addEventListener('click', handleGenerateForSale);
+                startRoundButton.addEventListener('click', startNewRound);
+                callButton.addEventListener('click', callNumber);
+                resetEventButton.addEventListener('click', resetEvent);
+                numberInput.addEventListener('keypress', function(event) { if (event.key === 'Enter' && gameActive) { event.preventDefault(); callNumber(); } });
+                saveSaleButton.addEventListener('click', saveSale);
+                cancelModalButton.addEventListener('click', closeModal);
+                closeWinnerModalButton.addEventListener('click', closeWinnerModal);
+
+                console.log("--- Inicialización Bingo v13 completada ---"); // Versión actualizada
+
+            } catch (error) {
+                console.error("!!! ERROR FATAL INICIALIZACIÓN:", error);
+                if (messageArea) { messageArea.textContent = `ERROR GRAVE: ${error.message}. Intenta 'Nuevo Evento'.`; messageArea.style.color = 'red'; }
+                else { alert(`ERROR GRAVE: ${error.message}. Revisa consola (F12).`); }
+                if(resetEventButton) { resetEventButton.disabled = false; console.log("Habilitando reseteo por error."); }
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+    </script>
+</body>
+</html>
