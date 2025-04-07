@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BINGO - Centro Ancianos Hatillo (v26 - Sonido)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>BINGO - Centro Ancianos Hatillo (v26 - Sonido CDN Alt)</title> <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
+    <script src="https://unpkg.com/tone@14.7.77/build/Tone.min.js"></script>
     <style>
         /* Estilos Generales (sin cambios) */
         body { font-family: 'Inter', sans-serif; }
@@ -83,8 +82,7 @@
             <div id="left-controls" class="w-full lg:w-1/3 flex flex-col gap-4">
 
                 <div class="flex flex-col gap-4 border-b border-gray-700 pb-4">
-                    <button id="generateForSaleButton" title="Genera 100 cartones nuevos (¡Requiere CLAVE!)" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800">Generar Cartones</button>
-                    <div class="flex flex-col items-start">
+                    <button id="generateForSaleButton" title="Genera 100 cartones nuevos (¡Requiere CLAVE!)" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800" disabled>Generar Cartones</button> <div class="flex flex-col items-start">
                         <label for="gamePatternSelect" class="text-xs text-gray-400 mb-1">Modo de Juego:</label>
                         <select id="gamePatternSelect" name="gamePattern" class="w-full">
                             <option value="full_card">Cartón Lleno</option>
@@ -93,8 +91,8 @@
                         </select>
                     </div>
                     <button id="startRoundButton" title="Inicia el sorteo con el modo de juego seleccionado" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800" disabled>Iniciar Sorteo</button>
-                    <div class="flex w-full gap-2">
-                        <input type="number" id="numberInput" placeholder="Número" min="1" max="75" class="flex-grow form-input bg-gray-700 border border-gray-600 text-white rounded-md p-2 text-center focus:ring-blue-500 focus:border-blue-500" disabled>
+                    <button id="cancelRoundButton" title="Cancela el sorteo actual en curso (¡Requiere CLAVE!)" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800" disabled>Cancelar Sorteo</button>
+                    <div class="flex w-full gap-2 mt-4"> <input type="number" id="numberInput" placeholder="Número" min="1" max="75" class="flex-grow form-input bg-gray-700 border border-gray-600 text-white rounded-md p-2 text-center focus:ring-blue-500 focus:border-blue-500" disabled>
                         <button id="callButton" title="Canta el número ingresado" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800" disabled>Cantar</button>
                     </div>
                 </div>
@@ -140,7 +138,7 @@
     <div id="shareModal" class="modal hidden"> <div class="modal-content"> <h2>Compartir Cartón Vendido</h2> <p class="text-sm text-gray-400 mb-4">Se ha generado una imagen del cartón. Descárgala y luego compártela por WhatsApp.</p> <div id="shareImagePreviewContainer"> <span id="shareLoading" class="hidden">Generando imagen...</span> <img id="shareImagePreview" src="" alt="Vista previa del cartón" class="hidden"/> </div> <div class="modal-buttons"> <button id="downloadImageButton" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out" disabled>Descargar Imagen</button> <button id="shareWhatsAppButton" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out" disabled>Compartir por WhatsApp</button> <button id="closeShareModalButton" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out">Cerrar</button> </div> <p class="text-xs text-gray-500 mt-3 text-center">Nota: Para WhatsApp, asegúrate que el número de teléfono incluya el código de país (ej: 506 para Costa Rica).</p> </div> </div>
 
     <script>
-        // --- Código JavaScript (v26 - con Sonido) ---
+        // --- Código JavaScript (v26 - Sonido CDN Alt) ---
         const NUM_CARDS = 100; const MIN_NUMBER = 1; const MAX_NUMBER = 75;
         const BINGO_RANGES = { B: { min: 1, max: 15, count: 5 }, I: { min: 16, max: 30, count: 5 }, N: { min: 31, max: 45, count: 4 }, G: { min: 46, max: 60, count: 5 }, O: { min: 61, max: 75, count: 5 } };
         const BINGO_COLUMNS = ['B', 'I', 'N', 'G', 'O'];
@@ -157,7 +155,9 @@
         let shareImageDataUrl = null;
         let shareCardInfo = {};
         let currentGamePattern = 'full_card';
-        let generateForSaleButton, startRoundButton, numberInput, callButton, resetEventButton, messageArea,
+        let allowGenerate = false;
+
+        let generateForSaleButton, startRoundButton, cancelRoundButton, numberInput, callButton, resetEventButton, messageArea,
             calledNumbersDisplay, calledCount, soldCount, cardsDisplayArea, saleInfoModal, modalTitle,
             modalCardIdInput, modalSaleFields, modalInfoFields, buyerNameInput, buyerPhoneInput,
             infoBuyerName, infoBuyerPhone, saveSaleButton, cancelModalButton, winnerModal,
@@ -195,19 +195,52 @@
         function prepareCardsForGame() { cardsForGame = {}; if (!allCardsData) return 0; const soldCards = allCardsData.filter(card => card.isSold); soldCards.forEach(cardData => { cardsForGame[cardData.id] = cardData; }); const count = Object.keys(cardsForGame).length; console.log(`Preparados ${count} cartones vendidos para la verificación de ganadores.`); return count; }
 
         // --- Funciones de Control del Flujo del Juego ---
-        function handleGenerateForSale() { console.log("--- Botón 'Generar Cartones' presionado ---"); const enteredPassword = prompt("Por seguridad, ingresa la clave para generar cartones:"); if (enteredPassword === null) { displayMessage("Generación cancelada."); console.log("Generación cancelada por el usuario en prompt de clave."); return; } if (enteredPassword !== RESET_PASSWORD) { console.warn("Intento de generar cartones con clave incorrecta."); displayMessage("Clave incorrecta. Generación cancelada."); return; } console.log("Clave correcta para generar cartones."); if (cardsAreGenerated && !confirm("¿Estás seguro de generar un NUEVO set de cartones? ¡Se PERDERÁN todas las ventas y sorteos anteriores! Esta acción NO se puede deshacer.")) { console.log("Generación cancelada por el usuario en confirmación."); return; } try { displayMessage("Generando cartones, por favor espera..."); console.log("Limpiando estado anterior (localStorage y variables)..."); clearLocalStorage(); console.log("Generando nuevos datos de cartones..."); generateAllCardsData(); console.log(`${allCardsData.length} cartones generados en memoria.`); console.log("Mostrando los nuevos cartones en la interfaz..."); displayCardsForSale(allCardsData); console.log("Actualizando contadores y UI..."); updateCalledNumbersDisplay(); updateSoldCountDisplay(); if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = '-'; updateUI(); displayMessage(`¡${NUM_CARDS} cartones generados! Haz clic en un cartón para venderlo.`); console.log("Guardando nuevo estado inicial en localStorage..."); saveStateToLocalStorage(); console.log("--- Proceso 'Generar Cartones' completado ---"); } catch(error) { console.error("!!! ERROR GRAVE durante la generación de cartones:", error); displayMessage("Error al generar los cartones. Revisa la consola (F12) para detalles."); clearLocalStorage(); updateUI(); } }
+        function handleGenerateForSale() {
+            console.log("--- Botón 'Generar Cartones' presionado ---");
+            try {
+                displayMessage("Generando cartones, por favor espera...");
+                console.log("Generando nuevos datos de cartones...");
+                generateAllCardsData();
+                console.log(`${allCardsData.length} cartones generados en memoria.`);
+                console.log("Mostrando los nuevos cartones en la interfaz...");
+                displayCardsForSale(allCardsData);
+                console.log("Actualizando contadores y UI...");
+                updateCalledNumbersDisplay();
+                updateSoldCountDisplay();
+                if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = '-';
+                updateUI();
+                displayMessage(`¡${NUM_CARDS} cartones generados! Haz clic en un cartón para venderlo.`);
+                console.log("Guardando nuevo estado inicial en localStorage...");
+                saveStateToLocalStorage();
+                allowGenerate = false;
+                updateUI();
+                console.log("--- Proceso 'Generar Cartones' completado. Botón deshabilitado. ---");
+            } catch(error) {
+                console.error("!!! ERROR GRAVE durante la generación de cartones:", error);
+                displayMessage("Error al generar los cartones. Revisa la consola (F12) para detalles.");
+                clearLocalStorage();
+                updateUI();
+            }
+        }
         function startNewRound() {
             console.log("--- Botón 'Iniciar Sorteo' / 'Siguiente Sorteo' presionado ---");
             if (!cardsAreGenerated) { displayMessage("Error: Debes generar los cartones primero."); console.log("Inicio de sorteo abortado: no hay cartones generados."); return; }
             if (gameActive) { displayMessage("El sorteo ya está en curso."); console.log("Inicio de sorteo abortado: juego ya activo."); return; }
 
-            // *** NUEVO: Iniciar contexto de audio de Tone.js ***
-            if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    console.log("Contexto de audio iniciado.");
-                }).catch(e => {
-                    console.error("Error al iniciar contexto de audio:", e);
-                });
+            // Iniciar contexto de audio de Tone.js (con más logs)
+            if (typeof Tone !== 'undefined') {
+                console.log(`Intentando iniciar audio en startNewRound. Estado actual: ${Tone.context.state}`);
+                if (Tone.context.state !== 'running') {
+                    Tone.start().then(() => {
+                        console.log(`Contexto de audio iniciado OK en startNewRound. Nuevo estado: ${Tone.context.state}`);
+                    }).catch(e => {
+                        console.error("Error al iniciar contexto de audio en startNewRound:", e);
+                    });
+                } else {
+                     console.log("Contexto de audio ya estaba iniciado en startNewRound.");
+                }
+            } else {
+                console.warn("Tone.js no está definido al intentar iniciar audio en startNewRound.");
             }
 
             currentGamePattern = gamePatternSelect.value;
@@ -230,36 +263,75 @@
             saveStateToLocalStorage();
             console.log("--- Inicio de nueva ronda completado ---");
         }
-        function callNumber() { if (!gameActive) { displayMessage("El sorteo no está activo. Presiona 'Iniciar Sorteo'."); return; } const numStr = numberInput.value.trim(); if (!numStr) { displayMessage("Por favor, ingrese un número."); numberInput.focus(); return; } const num = parseInt(numStr, 10); if (isNaN(num) || num < MIN_NUMBER || num > MAX_NUMBER) { displayMessage(`Número inválido. Debe ser entre ${MIN_NUMBER} y ${MAX_NUMBER}.`); numberInput.value = ''; numberInput.focus(); return; } if (calledNumbers.has(num)) { displayMessage(`El número ${num} ya fue cantado.`); numberInput.value = ''; numberInput.focus(); return; } calledNumbers.add(num); updateCalledNumbersDisplay(); markNumberOnCards(num); if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = num; displayMessage(`Número ${num} cantado. Verificando ganadores (${getPatternFriendlyName(currentGamePattern)})...`); numberInput.value = ''; numberInput.focus(); saveStateToLocalStorage(); setTimeout(() => { checkForWinner(num); if(gameActive) { displayMessage(`Esperando siguiente número. ${calledNumbers.size} cantados.`); } }, 50); }
+
+        /** Cancela el sorteo actual (requiere clave y confirmación). */
+        function cancelCurrentRound() {
+            console.log("--- Botón 'Cancelar Sorteo' presionado ---");
+            if (!gameActive) {
+                displayMessage("No hay un sorteo activo para cancelar.");
+                return;
+            }
+            const enteredPassword = prompt("Por seguridad, ingresa la clave para cancelar el sorteo:");
+            if (enteredPassword === null) { displayMessage("Cancelación abortada."); console.log("Cancelación abortada por el usuario en prompt de clave."); return; }
+            if (enteredPassword !== RESET_PASSWORD) { console.warn("Intento de cancelar sorteo con clave incorrecta."); displayMessage("Clave incorrecta. Cancelación abortada."); return; }
+             console.log("Clave correcta para cancelar sorteo.");
+            if (!confirm("¿Estás seguro de que deseas cancelar el sorteo actual? Los números cantados se mantendrán, pero tendrás que iniciar un 'Siguiente Sorteo'.")) { displayMessage("Cancelación abortada por el usuario."); console.log("Cancelación abortada por el usuario en confirmación."); return; }
+            console.log("Cancelando sorteo...");
+            gameActive = false;
+            winners = [];
+            updateUI();
+            displayMessage("Sorteo cancelado por el usuario. Presiona 'Siguiente Sorteo' para empezar uno nuevo.");
+            saveStateToLocalStorage();
+            console.log("--- Sorteo cancelado ---");
+        }
+
+        function callNumber() {
+             // NO intentar iniciar audio aquí
+             if (!gameActive) { displayMessage("El sorteo no está activo. Presiona 'Iniciar Sorteo'."); return; }
+             const numStr = numberInput.value.trim();
+             if (!numStr) { displayMessage("Por favor, ingrese un número."); numberInput.focus(); return; }
+             const num = parseInt(numStr, 10);
+             if (isNaN(num) || num < MIN_NUMBER || num > MAX_NUMBER) { displayMessage(`Número inválido. Debe ser entre ${MIN_NUMBER} y ${MAX_NUMBER}.`); numberInput.value = ''; numberInput.focus(); return; }
+             if (calledNumbers.has(num)) { displayMessage(`El número ${num} ya fue cantado.`); numberInput.value = ''; numberInput.focus(); return; }
+             calledNumbers.add(num);
+             updateCalledNumbersDisplay();
+             markNumberOnCards(num);
+             if(lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = num;
+             displayMessage(`Número ${num} cantado. Verificando ganadores (${getPatternFriendlyName(currentGamePattern)})...`);
+             numberInput.value = '';
+             numberInput.focus();
+             saveStateToLocalStorage();
+             setTimeout(() => {
+                 checkForWinner(num);
+                 if(gameActive) { displayMessage(`Esperando siguiente número. ${calledNumbers.size} cantados.`); }
+             }, 50);
+         }
         function checkForWinner(lastNumberCalled) { let newlyWon = false; console.log(`Verificando ganadores para patrón: ${currentGamePattern} con número ${lastNumberCalled}`); for (const cardIdStr in cardsForGame) { const cardId = parseInt(cardIdStr); if (winners.includes(cardId)) continue; const cardData = cardsForGame[cardId]; let isWinner = false; switch (currentGamePattern) { case 'full_card': isWinner = checkFullCardWin(cardData, calledNumbers); break; case 'line': isWinner = checkLineWin(cardData, calledNumbers); break; case 'corners': isWinner = checkCornersWin(cardData, calledNumbers); break; default: console.error(`Patrón de juego desconocido encontrado: ${currentGamePattern}`); return; } if (isWinner) { if (!winners.includes(cardId)) { winners.push(cardId); newlyWon = true; console.log(`¡BINGO! (${getPatternFriendlyName(currentGamePattern)}) detectado para Cartón ${cardId}`); const winnerCardElement = cardsDisplayArea.querySelector(`.bingo-card[data-card-id="${cardId}"]`); if (winnerCardElement) { winnerCardElement.style.borderColor = 'gold'; winnerCardElement.style.borderWidth = '4px'; } } } } if (newlyWon) { announceWinner(lastNumberCalled); } else { console.log(`No se encontraron nuevos ganadores con el número ${lastNumberCalled}.`); } }
         function announceWinner(winningNumber) {
             gameActive = false;
             const patternName = getPatternFriendlyName(currentGamePattern);
             console.log(`¡Bingo anunciado! Patrón: ${patternName}. Número ganador: ${winningNumber}. Ganadores: ${winners.join(', ')}`);
 
-            // *** NUEVO: Tocar sonido de BINGO ***
+            // Tocar sonido de BINGO (Versión Simplificada Revisada)
             try {
-                if (typeof Tone !== 'undefined') {
+                // Verificar si Tone está cargado Y si el contexto de audio está activo
+                if (typeof Tone !== 'undefined' && Tone.context.state === 'running') {
                     const synth = new Tone.Synth().toDestination();
                     const now = Tone.now();
-                    // Tocar una secuencia simple de notas ascendentes
-                    synth.triggerAttackRelease("C4", "8n", now);
-                    synth.triggerAttackRelease("E4", "8n", now + 0.15); // Más rápido
-                    synth.triggerAttackRelease("G4", "8n", now + 0.3);
-                    synth.triggerAttackRelease("C5", "4n", now + 0.45); // Nota final más larga
-                    console.log("Sonido de bingo reproducido.");
+                    synth.triggerAttackRelease("C4", "4n", now);
+                    synth.triggerAttackRelease("G4", "4n", now + 0.5);
+                    console.log("Sonido de bingo (simplificado) reproducido.");
                 } else {
-                    console.warn("Tone.js no está definido, no se puede reproducir sonido.");
+                    console.warn(`No se puede reproducir sonido. Tone definido: ${typeof Tone !== 'undefined'}. Estado contexto: ${typeof Tone !== 'undefined' ? Tone.context.state : 'N/A'}`);
                 }
             } catch(e) {
                 console.error("Error al reproducir sonido de bingo:", e);
             }
-            // *** FIN SONIDO ***
 
             const winnerDetails = winners.map(id => { const cardData = allCardsData.find(c => c.id === id); let detail = `<strong>Cartón ${id}`; if (cardData) { detail += ` (Vendido a: ${cardData.buyerName || 'Comprador Anónimo'})`; } else { detail += ` (Error al obtener datos)`; } detail += `</strong>`; return detail; }).join('<br>');
             let winnerPopupText = `¡BINGO por ${patternName} con el número <strong>${winningNumber}</strong>!<br><br>Ganador(es):<br>${winnerDetails}`;
             winnerModalText.innerHTML = winnerPopupText;
-            winnerModal.classList.remove('hidden'); // Mostrar modal DESPUÉS de intentar tocar sonido
+            winnerModal.classList.remove('hidden'); // Mostrar modal
             updateUI();
             displayMessage(`¡Sorteo (${patternName}) terminado! Presiona 'Siguiente Sorteo' para continuar o 'Nuevo Evento' para reiniciar.`);
             saveStateToLocalStorage();
@@ -270,7 +342,61 @@
         function updateSoldCountDisplay() { if (!soldCount || !allCardsData) return; const count = allCardsData.filter(card => card.isSold).length; soldCount.textContent = count; }
         function displayMessage(msg) { if (messageArea) { messageArea.textContent = msg; } else { console.warn("Área de mensajes no encontrada, mensaje:", msg); } }
         function getPatternFriendlyName(patternValue) { switch (patternValue) { case 'full_card': return 'Cartón Lleno'; case 'line': return 'Línea Recta'; case 'corners': return 'Cuatro Esquinas'; default: return patternValue; } }
-        function updateUI() { console.log(`--- Actualizando UI --- Estado: generated=${cardsAreGenerated}, active=${gameActive}, winners=${winners.length}, pattern=${currentGamePattern}`); const elementsToCheck = { generateForSaleButton, startRoundButton, numberInput, callButton, resetEventButton, cardsDisplayArea, gamePatternSelect, lastCalledNumberDisplay, printCardsButton }; for (const key in elementsToCheck) { if (!elementsToCheck[key]) { console.error(`Error UI Crítico: Elemento DOM '${key}' no encontrado durante updateUI.`); displayMessage(`ERROR CRÍTICO DE INTERFAZ: Falta ${key}. Intenta recargar o reiniciar.`); if(document.getElementById('resetEventButton')) document.getElementById('resetEventButton').disabled = false; return; } } try { generateForSaleButton.disabled = gameActive; startRoundButton.disabled = !cardsAreGenerated || gameActive; resetEventButton.disabled = gameActive; gamePatternSelect.disabled = gameActive; printCardsButton.disabled = !cardsAreGenerated || gameActive; const callControlsDisabled = !gameActive; numberInput.disabled = callControlsDisabled; callButton.disabled = callControlsDisabled; if (gameActive) { startRoundButton.textContent = 'Sorteo en Curso'; startRoundButton.classList.remove('bg-green-600', 'hover:bg-green-700'); startRoundButton.classList.add('bg-yellow-600', 'hover:bg-yellow-700'); } else if (cardsAreGenerated) { startRoundButton.textContent = (winners && winners.length > 0) ? 'Siguiente Sorteo' : 'Iniciar Sorteo'; startRoundButton.classList.remove('bg-yellow-600', 'hover:bg-yellow-700'); startRoundButton.classList.add('bg-green-600', 'hover:bg-green-700'); } else { startRoundButton.textContent = 'Iniciar Sorteo'; startRoundButton.classList.remove('bg-yellow-600', 'hover:bg-yellow-700'); startRoundButton.classList.add('bg-green-600', 'hover:bg-green-700'); } const cardElements = cardsDisplayArea.querySelectorAll('.bingo-card'); cardElements.forEach(el => { el.removeEventListener('click', handleCardClick); if (!gameActive) { el.addEventListener('click', handleCardClick); el.classList.remove('disabled-card'); el.style.cursor = 'pointer'; } else { el.classList.add('disabled-card'); el.style.cursor = 'default'; } }); console.log("--- Actualización de UI completada ---"); } catch (error) { console.error("Error durante la actualización de la UI:", error); displayMessage("Error al actualizar la interfaz de usuario."); } }
+        function updateUI() {
+            console.log(`--- Actualizando UI --- Estado: generated=${cardsAreGenerated}, active=${gameActive}, allowGen=${allowGenerate}`);
+            const elementsToCheck = { generateForSaleButton, startRoundButton, cancelRoundButton, numberInput, callButton, resetEventButton, cardsDisplayArea, gamePatternSelect, lastCalledNumberDisplay, printCardsButton };
+            for (const key in elementsToCheck) {
+                if (!elementsToCheck[key]) {
+                    console.error(`Error UI Crítico: Elemento DOM '${key}' no encontrado durante updateUI.`);
+                    displayMessage(`ERROR CRÍTICO DE INTERFAZ: Falta ${key}. Intenta recargar o reiniciar.`);
+                    if(document.getElementById('resetEventButton')) document.getElementById('resetEventButton').disabled = false;
+                    return;
+                }
+            }
+            try {
+                generateForSaleButton.disabled = gameActive || !allowGenerate;
+                startRoundButton.disabled = !cardsAreGenerated || gameActive;
+                resetEventButton.disabled = gameActive;
+                gamePatternSelect.disabled = gameActive;
+                printCardsButton.disabled = !cardsAreGenerated || gameActive;
+                cancelRoundButton.disabled = !gameActive;
+
+                const callControlsDisabled = !gameActive;
+                numberInput.disabled = callControlsDisabled;
+                callButton.disabled = callControlsDisabled;
+
+                if (gameActive) {
+                    startRoundButton.textContent = 'Sorteo en Curso';
+                    startRoundButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    startRoundButton.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
+                } else if (cardsAreGenerated) {
+                    startRoundButton.textContent = (calledNumbers.size > 0 || winners.length > 0) ? 'Siguiente Sorteo' : 'Iniciar Sorteo';
+                    startRoundButton.classList.remove('bg-yellow-600', 'hover:bg-yellow-700');
+                    startRoundButton.classList.add('bg-green-600', 'hover:bg-green-700');
+                } else {
+                    startRoundButton.textContent = 'Iniciar Sorteo';
+                    startRoundButton.classList.remove('bg-yellow-600', 'hover:bg-yellow-700');
+                    startRoundButton.classList.add('bg-green-600', 'hover:bg-green-700');
+                }
+
+                const cardElements = cardsDisplayArea.querySelectorAll('.bingo-card');
+                cardElements.forEach(el => {
+                    el.removeEventListener('click', handleCardClick);
+                    if (!gameActive) {
+                        el.addEventListener('click', handleCardClick);
+                        el.classList.remove('disabled-card');
+                        el.style.cursor = 'pointer';
+                    } else {
+                        el.classList.add('disabled-card');
+                        el.style.cursor = 'default';
+                    }
+                });
+                console.log("--- Actualización de UI completada ---");
+            } catch (error) {
+                console.error("Error durante la actualización de la UI:", error);
+                displayMessage("Error al actualizar la interfaz de usuario.");
+            }
+        }
 
         // --- Funciones de Reseteo y Compartir ---
         function resetEvent() { if (confirm("¿Estás REALMENTE SEGURO? ¡Se BORRARÁN TODOS los datos guardados (cartones, ventas, sorteos) y se RECARGARÁ la página! Esta acción no se puede deshacer.")) { const enteredPassword = prompt("Por seguridad, ingresa la clave para reiniciar el evento:"); if (enteredPassword === null) { displayMessage("Reinicio cancelado."); return; } if (enteredPassword === RESET_PASSWORD) { console.log("--- Iniciando reseteo de evento v26 (Clave correcta) ---"); try { sessionStorage.setItem(RESET_FLAG_KEY, 'true'); displayMessage("Clave correcta. Borrando datos y recargando la página..."); console.log("Bandera de reseteo puesta en sessionStorage. Recargando página..."); location.reload(true); } catch (error) { console.error("Error durante el proceso de reseteo (antes de recargar):", error); displayMessage("Error al intentar reiniciar. Intenta recargar manualmente (F5)."); sessionStorage.removeItem(RESET_FLAG_KEY); } } else { console.warn("Intento de reinicio de evento con clave incorrecta."); displayMessage("Clave incorrecta. Reinicio cancelado."); } } else { displayMessage("Reinicio cancelado por el usuario."); } }
@@ -283,8 +409,141 @@
         function printAllCards() { console.log("Iniciando proceso de impresión de todos los cartones..."); displayMessage("Preparando vista de impresión..."); setTimeout(() => { window.print(); displayMessage("Diálogo de impresión abierto. Usa 'Guardar como PDF' si necesitas un archivo digital."); }, 100); }
 
         // --- Inicialización de la Aplicación ---
-        function initializeApp() { console.log("--- Inicializando Aplicación Bingo v26 ---"); try { const resetFlag = sessionStorage.getItem(RESET_FLAG_KEY); let performLoad = true; if (resetFlag === 'true') { console.log("Bandera de reseteo detectada en sessionStorage."); sessionStorage.removeItem(RESET_FLAG_KEY); clearLocalStorage(); performLoad = false; console.log("Reseteo post-recarga completado (localStorage limpiado)."); } generateForSaleButton = document.getElementById('generateForSaleButton'); startRoundButton = document.getElementById('startRoundButton'); numberInput = document.getElementById('numberInput'); callButton = document.getElementById('callButton'); resetEventButton = document.getElementById('resetEventButton'); messageArea = document.getElementById('messageArea'); calledNumbersDisplay = document.getElementById('calledNumbersDisplay'); calledCount = document.getElementById('calledCount'); soldCount = document.getElementById('soldCount'); cardsDisplayArea = document.getElementById('cardsDisplayArea'); saleInfoModal = document.getElementById('saleInfoModal'); modalTitle = document.getElementById('modalTitle'); modalCardIdInput = document.getElementById('modalCardId'); modalSaleFields = document.getElementById('modalSaleFields'); modalInfoFields = document.getElementById('modalInfoFields'); buyerNameInput = document.getElementById('buyerName'); buyerPhoneInput = document.getElementById('buyerPhone'); infoBuyerName = document.getElementById('infoBuyerName'); infoBuyerPhone = document.getElementById('infoBuyerPhone'); saveSaleButton = document.getElementById('saveSaleButton'); cancelModalButton = document.getElementById('cancelModalButton'); winnerModal = document.getElementById('winnerModal'); winnerModalText = document.getElementById('winnerModalText'); closeWinnerModalButton = document.getElementById('closeWinnerModalButton'); shareModal = document.getElementById('shareModal'); shareImagePreviewContainer = document.getElementById('shareImagePreviewContainer'); shareLoading = document.getElementById('shareLoading'); shareImagePreview = document.getElementById('shareImagePreview'); downloadImageButton = document.getElementById('downloadImageButton'); shareWhatsAppButton = document.getElementById('shareWhatsAppButton'); closeShareModalButton = document.getElementById('closeShareModalButton'); gamePatternSelect = document.getElementById('gamePatternSelect'); lastCalledNumberDisplay = document.getElementById('lastCalledNumberDisplay'); printCardsButton = document.getElementById('printCardsButton'); const requiredElements = { generateForSaleButton, startRoundButton, numberInput, callButton, resetEventButton, messageArea, calledNumbersDisplay, calledCount, soldCount, cardsDisplayArea, saleInfoModal, modalTitle, modalCardIdInput, modalSaleFields, modalInfoFields, buyerNameInput, buyerPhoneInput, infoBuyerName, infoBuyerPhone, saveSaleButton, cancelModalButton, winnerModal, winnerModalText, closeWinnerModalButton, shareModal, shareImagePreviewContainer, shareLoading, shareImagePreview, downloadImageButton, shareWhatsAppButton, closeShareModalButton, gamePatternSelect, lastCalledNumberDisplay, printCardsButton }; for(const key in requiredElements) { if (!requiredElements[key]) { throw new Error(`Error fatal de inicialización: Elemento DOM '${key}' no encontrado.`); } } console.log("Todos los elementos DOM requeridos fueron encontrados."); let loaded = false; if (performLoad) { loaded = loadStateFromLocalStorage(); } if (loaded) { displayCardsForSale(allCardsData); updateCalledNumbersDisplay(); updateSoldCountDisplay(); if (gameActive) { prepareCardsForGame(); displayMessage(`Sorteo cargado y en curso. ${calledNumbers.size} números cantados.`); calledNumbers.forEach(num => markNumberOnCards(num)); const lastNum = Array.from(calledNumbers).pop(); if(lastNum && lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = lastNum; } else if (winners.length > 0) { displayMessage("Estado cargado. El último sorteo terminó. Presiona 'Siguiente Sorteo'."); } else if (cardsAreGenerated) { displayMessage("Estado cargado. Cartones listos. Presiona 'Iniciar Sorteo'."); } else { displayMessage("Bienvenido. Presiona 'Generar Cartones'."); } } else { displayMessage(resetFlag === 'true' ? "Evento reiniciado correctamente. Genera nuevos cartones." : "Bienvenido. Presiona 'Generar Cartones'."); updateSoldCountDisplay(); updateCalledNumbersDisplay(); cardsDisplayArea.innerHTML = '<p class="text-gray-500">No hay cartones generados.</p>'; } if (!gameActive && lastCalledNumberDisplay) { lastCalledNumberDisplay.textContent = '-'; } updateUI(); generateForSaleButton.addEventListener('click', handleGenerateForSale); startRoundButton.addEventListener('click', startNewRound); callButton.addEventListener('click', callNumber); resetEventButton.addEventListener('click', resetEvent); numberInput.addEventListener('keypress', function(event) { if (event.key === 'Enter' && gameActive) { event.preventDefault(); callNumber(); } }); saveSaleButton.addEventListener('click', saveSale); cancelModalButton.addEventListener('click', closeModal); closeWinnerModalButton.addEventListener('click', closeWinnerModal); downloadImageButton.addEventListener('click', downloadCardImage); shareWhatsAppButton.addEventListener('click', shareCardViaWhatsApp); closeShareModalButton.addEventListener('click', closeShareModal); printCardsButton.addEventListener('click', printAllCards); console.log("--- Inicialización de Bingo v26 completada exitosamente ---"); } catch (error) { console.error("!!! ERROR FATAL DURANTE LA INICIALIZACIÓN DE LA APLICACIÓN:", error); if (messageArea) { messageArea.textContent = `ERROR GRAVE AL INICIAR: ${error.message}. Intenta usar 'Nuevo Evento' o recargar la página (F5).`; messageArea.style.color = 'red'; } else { alert(`ERROR GRAVE AL INICIAR: ${error.message}. Revisa la consola (F12) e intenta recargar o usar 'Nuevo Evento'.`); } if(resetEventButton) { resetEventButton.disabled = false; console.log("Habilitando botón de reseteo debido a error de inicialización."); } } }
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        function initializeApp() {
+            console.log("--- Inicializando Aplicación Bingo v26 ---");
+             // *** Verificar si Tone.js se cargó al inicio ***
+            if (typeof Tone === 'undefined') {
+                console.error("¡ERROR CRÍTICO! Tone.js NO se cargó correctamente antes de initializeApp.");
+            } else {
+                console.log("Tone.js parece estar cargado correctamente al inicio de initializeApp.");
+            }
+
+            allowGenerate = false; // Asegurar que siempre inicie como false
+            try {
+                const resetFlag = sessionStorage.getItem(RESET_FLAG_KEY);
+                let performLoad = true;
+                if (resetFlag === 'true') {
+                    console.log("Bandera de reseteo detectada en sessionStorage.");
+                    sessionStorage.removeItem(RESET_FLAG_KEY);
+                    clearLocalStorage();
+                    performLoad = false;
+                    allowGenerate = true; // Habilitar Generar porque se acaba de resetear
+                    console.log("Reseteo post-recarga completado. Generar cartones habilitado.");
+                }
+
+                // Asignar referencias DOM
+                generateForSaleButton = document.getElementById('generateForSaleButton');
+                startRoundButton = document.getElementById('startRoundButton');
+                cancelRoundButton = document.getElementById('cancelRoundButton');
+                numberInput = document.getElementById('numberInput');
+                callButton = document.getElementById('callButton');
+                resetEventButton = document.getElementById('resetEventButton');
+                messageArea = document.getElementById('messageArea');
+                calledNumbersDisplay = document.getElementById('calledNumbersDisplay');
+                calledCount = document.getElementById('calledCount');
+                soldCount = document.getElementById('soldCount');
+                cardsDisplayArea = document.getElementById('cardsDisplayArea');
+                saleInfoModal = document.getElementById('saleInfoModal');
+                modalTitle = document.getElementById('modalTitle');
+                modalCardIdInput = document.getElementById('modalCardId');
+                modalSaleFields = document.getElementById('modalSaleFields');
+                modalInfoFields = document.getElementById('modalInfoFields');
+                buyerNameInput = document.getElementById('buyerName');
+                buyerPhoneInput = document.getElementById('buyerPhone');
+                infoBuyerName = document.getElementById('infoBuyerName');
+                infoBuyerPhone = document.getElementById('infoBuyerPhone');
+                saveSaleButton = document.getElementById('saveSaleButton');
+                cancelModalButton = document.getElementById('cancelModalButton');
+                winnerModal = document.getElementById('winnerModal');
+                winnerModalText = document.getElementById('winnerModalText');
+                closeWinnerModalButton = document.getElementById('closeWinnerModalButton');
+                shareModal = document.getElementById('shareModal');
+                shareImagePreviewContainer = document.getElementById('shareImagePreviewContainer');
+                shareLoading = document.getElementById('shareLoading');
+                shareImagePreview = document.getElementById('shareImagePreview');
+                downloadImageButton = document.getElementById('downloadImageButton');
+                shareWhatsAppButton = document.getElementById('shareWhatsAppButton');
+                closeShareModalButton = document.getElementById('closeShareModalButton');
+                gamePatternSelect = document.getElementById('gamePatternSelect');
+                lastCalledNumberDisplay = document.getElementById('lastCalledNumberDisplay');
+                printCardsButton = document.getElementById('printCardsButton');
+
+                // Verificar elementos esenciales
+                const requiredElements = { generateForSaleButton, startRoundButton, cancelRoundButton, numberInput, callButton, resetEventButton, messageArea, calledNumbersDisplay, calledCount, soldCount, cardsDisplayArea, saleInfoModal, modalTitle, modalCardIdInput, modalSaleFields, modalInfoFields, buyerNameInput, buyerPhoneInput, infoBuyerName, infoBuyerPhone, saveSaleButton, cancelModalButton, winnerModal, winnerModalText, closeWinnerModalButton, shareModal, shareImagePreviewContainer, shareLoading, shareImagePreview, downloadImageButton, shareWhatsAppButton, closeShareModalButton, gamePatternSelect, lastCalledNumberDisplay, printCardsButton };
+                for(const key in requiredElements) {
+                    if (!requiredElements[key]) {
+                        throw new Error(`Error fatal de inicialización: Elemento DOM '${key}' no encontrado.`);
+                    }
+                }
+                console.log("Todos los elementos DOM requeridos fueron encontrados.");
+
+                // Cargar estado
+                let loaded = false;
+                if (performLoad) {
+                    loaded = loadStateFromLocalStorage();
+                    // Si se cargó estado existente, NO permitir generar hasta nuevo evento
+                    if (loaded && cardsAreGenerated) {
+                        allowGenerate = false;
+                        console.log("Estado cargado con cartones existentes. Generar deshabilitado hasta 'Nuevo Evento'.");
+                    }
+                 }
+
+                // Actualizar UI inicial
+                if (loaded) {
+                    displayCardsForSale(allCardsData);
+                    updateCalledNumbersDisplay();
+                    updateSoldCountDisplay();
+                    if (gameActive) {
+                        prepareCardsForGame();
+                        displayMessage(`Sorteo cargado y en curso. ${calledNumbers.size} números cantados.`);
+                        calledNumbers.forEach(num => markNumberOnCards(num));
+                        const lastNum = Array.from(calledNumbers).pop();
+                        if(lastNum && lastCalledNumberDisplay) lastCalledNumberDisplay.textContent = lastNum;
+                    } else if (winners.length > 0) {
+                        displayMessage("Estado cargado. El último sorteo terminó. Presiona 'Siguiente Sorteo'.");
+                    } else if (cardsAreGenerated) {
+                        displayMessage(calledNumbers.size > 0 ? `Sorteo anterior cancelado con ${calledNumbers.size} números. Presiona 'Siguiente Sorteo'.` : "Estado cargado. Cartones listos. Presiona 'Iniciar Sorteo'.");
+                    } else {
+                         displayMessage("Bienvenido. Presiona 'Nuevo Evento' y luego 'Generar Cartones'.");
+                    }
+                } else {
+                    displayMessage(resetFlag === 'true' ? "Evento reiniciado. Presiona 'Generar Cartones'." : "Bienvenido. Presiona 'Nuevo Evento' para empezar.");
+                    updateSoldCountDisplay();
+                    updateCalledNumbersDisplay();
+                    cardsDisplayArea.innerHTML = '<p class="text-gray-500">Presiona \'Nuevo Evento\' para empezar.</p>';
+                }
+                if (!gameActive && lastCalledNumberDisplay) { lastCalledNumberDisplay.textContent = '-'; }
+
+                // Actualizar estado de botones y listeners
+                updateUI();
+
+                // Asignar TODOS los event listeners
+                generateForSaleButton.addEventListener('click', handleGenerateForSale);
+                startRoundButton.addEventListener('click', startNewRound);
+                cancelRoundButton.addEventListener('click', cancelCurrentRound);
+                callButton.addEventListener('click', callNumber);
+                resetEventButton.addEventListener('click', resetEvent);
+                numberInput.addEventListener('keypress', function(event) { if (event.key === 'Enter' && gameActive) { event.preventDefault(); callNumber(); } });
+                saveSaleButton.addEventListener('click', saveSale);
+                cancelModalButton.addEventListener('click', closeModal);
+                closeWinnerModalButton.addEventListener('click', closeWinnerModal);
+                downloadImageButton.addEventListener('click', downloadCardImage);
+                shareWhatsAppButton.addEventListener('click', shareCardViaWhatsApp);
+                closeShareModalButton.addEventListener('click', closeShareModal);
+                printCardsButton.addEventListener('click', printAllCards);
+
+                console.log("--- Inicialización de Bingo v26 completada exitosamente ---");
+
+            } catch (error) {
+                console.error("!!! ERROR FATAL DURANTE LA INICIALIZACIÓN DE LA APLICACIÓN:", error);
+                if (messageArea) { messageArea.textContent = `ERROR GRAVE AL INICIAR: ${error.message}. Intenta usar 'Nuevo Evento' o recargar la página (F5).`; messageArea.style.color = 'red'; }
+                else { alert(`ERROR GRAVE AL INICIAR: ${error.message}. Revisa la consola (F12) e intenta recargar o usar 'Nuevo Evento'.`); }
+                if(resetEventButton) { resetEventButton.disabled = false; console.log("Habilitando botón de reseteo debido a error de inicialización."); }
+            }
+        }
+
+        // --- Punto de Entrada ---
+        window.onload = initializeApp;
 
     </script>
 </body>
